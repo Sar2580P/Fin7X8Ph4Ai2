@@ -10,7 +10,14 @@ python = "^3.10"
 lightning = "^2.2.4"
 pytorch-lightning = "^2.2.4"
 numpy = "^1.26.4"
+torch = {version = "1.10.2+cu113", source = "torch"}
+torchvision = "0.11.3+cu113"
+detectron2 = {git = "https://github.com/helpmefindaname/detectron2.git", rev = "main"}
 
+
+
+[tool.poetry.group.dev.dependencies]
+ipykernel = "^6.29.4"
 
 [build-system]
 requires = ["poetry-core"]
