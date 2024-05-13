@@ -1,0 +1,40 @@
+task: detect # (str) YOLO task, i.e. detect, segment, classify, pose
+mode: train # (str) YOLO mode, i.e. train, val, predict, export, track, benchmark
+
+# Train settings -------------------------------------------------------------------------------------------------------
+model: yolov5s.pt # (str, optional) path to model file, i.e. yolov8n.pt, yolov8n.yaml
+data: obj_detection/dataset.yaml # (str, optional) path to data file, i.e. coco8.yaml
+epochs: 1 # (int) number of epochs to train for
+batch: 16 # (int) number of images per batch (-1 for AutoBatch)
+imgsz: 640 # (int | list) input images size as int for train and val modes, or list[w,h] for predict and export modes
+project: 'coco128_detection' # (str, optional) project name
+name: 'yolov5s_run'  # (str, optional) experiment name, results saved to 'project/name' directory
+pretrained: True # (bool | str) whether to use a pretrained model (bool) or a model to load weights from (str)
+optimizer: Adam # (str) optimizer to use, choices=[SGD, Adam, Adamax, AdamW, NAdam, RAdam, RMSProp, auto]
+resume: False # (bool) resume training from last checkpoint
+
+# Val/Test settings ----------------------------------------------------------------------------------------------------
+max_det: 10 # (int) maximum number of detections per image
+
+
+# Predict settings -----------------------------------------------------------------------------------------------------
+source: # (str, optional) source directory for images or videos
+visualize: False # (bool) visualize model features
+embed: # (list[int], optional) return feature vectors/embeddings from given layers
+
+# Visualize settings ---------------------------------------------------------------------------------------------------
+save_txt: True # (bool) save results as .txt file
+save_crop: True # (bool) save cropped images with results
+show_labels: True # (bool) show prediction labels, i.e. 'person'
+show_conf: True # (bool) show prediction confidence, i.e. '0.99'
+show_boxes: True # (bool) show prediction boxes
+line_width: # (int, optional) line width of the bounding boxes. Scaled to image size if None.
+
+# Hyperparameters ------------------------------------------------------------------------------------------------------
+lr0: 0.01 # (float) initial learning rate (i.e. SGD=1E-2, Adam=1E-3)
+momentum: 0.937 # (float) SGD momentum/Adam beta1
+weight_decay: 0.0005 # (float) optimizer weight decay 5e-4
+warmup_epochs: 3.0 # (float) warmup epochs (fractions ok)
+warmup_momentum: 0.8 # (float) warmup initial momentum
+warmup_bias_lr: 0.1 # (float) warmup initial bias lr
+

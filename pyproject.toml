@@ -10,7 +10,14 @@ python = "^3.10"
 lightning = "^2.2.4"
 pytorch-lightning = "^2.2.4"
 numpy = "^1.26.4"
+matplotlib = "^3.8.4"
+opencv-python = "^4.9.0.80"
+wandb = "^0.17.0"
+ultralytics = "^8.2.12"
 
+
+[tool.poetry.group.dev.dependencies]
+ipykernel = "^6.29.4"
 
 [build-system]
 requires = ["poetry-core"]
