@@ -15,7 +15,7 @@ class FC(nn.Module):
       self.model = self.get_model()
     def get_model(self):
       return nn.Sequential(
-          nn.Linear(self.in_size, self.out_size) , 
+          nn.Linear(self.in_size, self.out_size) ,
           nn.PReLU(),
           nn.Dropout(self.drop),
       )
@@ -27,10 +27,10 @@ def f(trainer):
     # for attr, value in vars(trainer).items():
     #     print(f"{attr}: {value}")
     print("Jai shree ram" , '\n'*10)
-    
+
 def g(trainer):
     print('Radhe Radhe')
-    
+
 available_models = 1
 
 override_config = yaml.safe_load('obj_detection/override_config.yaml')
@@ -39,6 +39,8 @@ trainer = DetectionTrainer(overrides=override_config)
 trainer.add_callback("on_pretrain_routine_start" , f)
 trainer.add_callback("on_train_start" ,  g)
 trainer.setup_model()
+print(trainer.model)
+
 trainer.train()
 # print(trainer.model)
 
@@ -52,6 +54,6 @@ config = {
     'dir': 'obj_detection'
 
 }
-
+print(type(trainer.model))
 
 Utils.plot_model(config , trainer.model)
