@@ -4,3 +4,4 @@ coco128_detection
 yolov5su.pt
 yolov8n.pt
 .env
+data
