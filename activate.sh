@@ -6,7 +6,7 @@ if [ -d $path_to_env ]; then
 else
   echo "Creating a working environment ..."
   poetry install --no-root
-  
+
 fi
 echo -e "\n\nActivating the working environment..."
 
@@ -19,3 +19,4 @@ if [ $wandb_usr == "sarvagya" ]; then
 fi
 
 poetry shell
+

@@ -1,5 +1,6 @@
 datasets
 wandb
+coco128_detection
 yolov5su.pt
 abcd
 coco128_detection
