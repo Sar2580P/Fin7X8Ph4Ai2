@@ -2,6 +2,10 @@ datasets
 wandb
 coco128_detection
 yolov5su.pt
+abcd
+coco128_detection
+coco128_segment
 yolov8n.pt
-.env
 data
+.env
+yolov8n-seg.pt
