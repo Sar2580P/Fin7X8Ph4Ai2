@@ -7,7 +7,7 @@ mode: train # (str) YOLO mode, i.e. train, val, predict, export, track, benchmar
 # Train settings -------------------------------------------------------------------------------------------------------
 model: yolov8n-seg.pt # (str, optional) path to model file, i.e. yolov8n.pt, yolov8n.yaml
 data: segment/dataset.yaml # (str, optional) path to data file, i.e. coco8.yaml
-epochs: 1 # (int) number of epochs to train for
+epochs: 100 # (int) number of epochs to train for
 time: # (float, optional) number of hours to train for, overrides epochs if supplied
 patience: 100 # (int) epochs to wait for no observable improvement for early stopping of training
 batch: 32 # (int) number of images per batch (-1 for AutoBatch)
@@ -86,10 +86,10 @@ workspace: 4 # (int) TensorRT: workspace size (GB)
 nms: False # (bool) CoreML: add NMS
 
 # Hyperparameters ------------------------------------------------------------------------------------------------------
-lr0: 0.01 # (float) initial learning rate (i.e. SGD=1E-2, Adam=1E-3)
-lrf: 0.01 # (float) final learning rate (lr0 * lrf)
+lr0: 0.0000001 # (float) initial learning rate (i.e. SGD=1E-2, Adam=1E-3)
+lrf: 0.0000041 # (float) final learning rate (lr0 * lrf)
 momentum: 0.937 # (float) SGD momentum/Adam beta1
-weight_decay: 0.0005 # (float) optimizer weight decay 5e-4
+weight_decay: 0.000005 # (float) optimizer weight decay 5e-4
 warmup_epochs: 3.0 # (float) warmup epochs (fractions ok)
 warmup_momentum: 0.8 # (float) warmup initial momentum
 warmup_bias_lr: 0.1 # (float) warmup initial bias lr
