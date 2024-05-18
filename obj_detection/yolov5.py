@@ -34,12 +34,13 @@ def g(trainer):
 available_models = 1
 
 override_config = yaml.safe_load('obj_detection/override_config.yaml')
+print(type(override_config) , override_config)
 trainer = DetectionTrainer(overrides=override_config)
 # trainer.model =  FC(0.5,32,128)          to pass custom architecture
-trainer.add_callback("on_pretrain_routine_start" , f)
-trainer.add_callback("on_train_start" ,  g)
-trainer.setup_model()
-trainer.train()
+# trainer.add_callback("on_pretrain_routine_start" , f)
+# trainer.add_callback("on_train_start" ,  g)
+# trainer.setup_model()
+# trainer.train()
 # print(trainer.model)
 
 

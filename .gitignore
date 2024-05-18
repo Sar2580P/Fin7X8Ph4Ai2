@@ -1,3 +1,7 @@
 datasets
 wandb
 yolov5su.pt
+abcd
+coco128_detection
+coco128_segment
+yolov8n.pt
