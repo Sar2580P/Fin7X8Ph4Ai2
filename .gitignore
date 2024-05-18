@@ -1,4 +1,3 @@
-datasets
 wandb
 coco128_detection
 yolov5su.pt
@@ -6,3 +5,10 @@ abcd
 coco128_detection
 coco128_segment
 yolov8n.pt
+.env
+yolov8n-obb.pt
+yolov8n-seg.pt
+datasets/coco128
+datasets/coco128-seg
+datasets/dota8
+datasets/misc_files
