@@ -1,0 +1,1390 @@
+/m/0bl9f
+│   Coin
+│   Flag
+│   Light bulb
+│   Toy
+│   │   Doll
+│   │   Balloon
+│   │   Dice
+│   │   Kite
+│       Teddy bear
+│   Home appliance
+│   │   Washing machine
+│   │   Toaster
+│   │   Oven
+│   │   Blender
+│   │   Gas stove
+│   │   Mechanical fan
+│   │   Kettle
+│   │   Refrigerator
+│   │   Wood-burning stove
+│   │   Mixer
+│   │   Coffeemaker
+│   │   Microwave oven
+│   │   Sewing machine
+│       Ceiling fan
+│   Plumbing fixture
+│   │   Sink
+│   │   Bidet
+│   │   Shower
+│   │   Tap
+│   │   Bathtub
+│       Toilet
+│   Office supplies
+│   │   Scissors
+│   │   Poster
+│   │   Box
+│   │   Whiteboard
+│   │   Adhesive tape
+│   │   Ring binder
+│   │   Plastic bag
+│   │   Toilet paper
+│   │   Envelope
+│       Pen
+│   Paper towel
+│   Pillow
+│   Spatula
+│   Cutting board
+│   Drinking straw
+│   Measuring cup
+│   Tableware
+│   │   Chopsticks
+│   │   Teapot
+│   │   Mug
+│   │   Coffee cup
+│   │   Salt and pepper shakers
+│   │   Saucer
+│   │   Bottle
+│   │   Bowl
+│   │   Plate
+│   │   Pitcher
+│   │   Kitchen knife
+│   │   Jug
+│   │   Platter
+│   │   Wine glass
+│   │   Spoon
+│   │   Fork
+│   │   Serving tray
+│       Cake stand
+│   Frying pan
+│   Wok
+│   Kitchen appliance
+│   │   Oven
+│   │   Blender
+│   │   Slow cooker
+│   │   Food processor
+│   │   Refrigerator
+│   │   Mixer
+│   │   Coffeemaker
+│   │   Microwave oven
+│       Pressure cooker
+│   Fireplace
+│   Countertop
+│   Book
+│   Furniture
+│   │   Chair
+│   │   Cabinetry
+│   │   Desk
+│   │   Couch
+│   │   │   Sofa bed
+│   │       Loveseat
+│   │   Nightstand
+│   │   Bookcase
+│   │   Bed
+│   │   │   Infant bed
+│   │       studio couch
+│   │   Filing cabinet
+│   │   Table
+│   │   │   Coffee table
+│   │       Kitchen & dining room table
+│   │   Chest of drawers
+│   │   Cupboard
+│   │   Bench
+│   │   Drawer
+│   │   Stool
+│   │   Shelf
+│   │   Wall clock
+│       Bathroom cabinet
+│   Dog bed
+│   Lantern
+│   Clock
+│   │   Alarm clock
+│   │   Digital clock
+│       Wall clock
+│   Vase
+│   Window blind
+│   Curtain
+│   Mirror
+│   Sculpture
+│   │   Snowman
+│   │   Bust
+│       Bronze sculpture
+│   Picture frame
+│   Candle
+│   Lamp
+│   Flowerpot
+│   Towel
+│   Beehive
+│   Tent
+│   Traffic light
+│   Billboard
+│   Traffic sign
+│       Stop sign
+│   Fire hydrant
+│   Fountain
+│   Street light
+│   Building
+│   │   Lighthouse
+│   │   Skyscraper
+│   │   Castle
+│   │   Tower
+│   │   House
+│   │   Office building
+│       Convenience store
+│   Swimming pool
+│   Person
+│   │   Man
+│   │   Woman
+│   │   Boy
+│       Girl
+│   Hot dog
+│   French fries
+│   Waffle
+│   Pancake
+│   Burrito
+│   Pretzel
+│   Popcorn
+│   Dessert
+│   │   Muffin
+│   │   Cookie
+│   │   Ice cream
+│   │   Cake
+│       Candy
+│   Guacamole
+│   Fruit
+│   │   Apple
+│   │   Grape
+│   │   Common fig
+│   │   Pear
+│   │   Strawberry
+│   │   Tomato
+│   │   Lemon
+│   │   Banana
+│   │   Orange
+│   │   Peach
+│   │   Mango
+│   │   Pineapple
+│   │   Grapefruit
+│   │   Pomegranate
+│       Watermelon
+│   Egg
+│   Bagel
+│   Bread
+│   Doughnut
+│   Croissant
+│   Tart
+│   Mushroom
+│   Pasta
+│   Pizza
+│   Seafood
+│       Shellfish
+│       │   Oyster
+│       │   Lobster
+│       │   Shrimp
+│           Crab
+│   Taco
+│   Vegetable
+│   │   Cucumber
+│   │   Radish
+│   │   Artichoke
+│   │   Potato
+│   │   Tomato
+│   │   Asparagus
+│   │   Squash
+│   │   │   Pumpkin
+│   │       Zucchini
+│   │   Cabbage
+│   │   Carrot
+│   │   Salad
+│   │   Broccoli
+│   │   Bell pepper
+│       Winter melon
+│   Honeycomb
+│   Sandwich
+│   │   Hamburger
+│       Submarine sandwich
+│   Sushi
+│   Houseplant
+│   Tree
+│   │   Christmas tree
+│   │   Palm tree
+│   │   Maple
+│       Willow
+│   Flower
+│   │   Lavender
+│   │   Rose
+│   │   Sunflower
+│       Lily
+│   Vehicle
+│   │   Land vehicle
+│   │   │   Ambulance
+│   │   │   Cart
+│   │   │   Bicycle
+│   │   │   Bus
+│   │   │   Snowmobile
+│   │   │   Golf cart
+│   │   │   Motorcycle
+│   │   │   Segway
+│   │   │   Tank
+│   │   │   Train
+│   │   │   Truck
+│   │   │   Car
+│   │   │   Taxi
+│   │   │   Wheelchair
+│   │   │   Limousine
+│   │       Van
+│   │   Watercraft
+│   │   │   Boat
+│   │   │   Jet ski
+│   │   │   Barge
+│   │   │   Gondola
+│   │       Canoe
+│       Aircraft
+│       │   Helicopter
+│       │   Airplane
+│           Rocket
+│   Shorts
+│   Dress
+│   Swimwear
+│   Brassiere
+│   Tiara
+│   Shirt
+│   Coat
+│   Suit
+│   Hat
+│   │   Cowboy hat
+│   │   Fedora
+│   │   Sombrero
+│       Sun hat
+│   Scarf
+│   Skirt
+│       Miniskirt
+│   Jacket
+│   Glove
+│       Baseball glove
+│   Belt
+│   Necklace
+│   Sock
+│   Earrings
+│   Tie
+│   Watch
+│   Umbrella
+│   Crown
+│   Swim cap
+│   Trousers
+│       Jeans
+│   Footwear
+│   │   Roller skates
+│   │   Boot
+│   │   High heels
+│       Sandal
+│   Sports uniform
+│   Luggage and bags
+│   │   Backpack
+│   │   Suitcase
+│   │   Briefcase
+│       Handbag
+│   Helmet
+│   │   Bicycle helmet
+│       Football helmet
+│   Animal
+│   │   Bird
+│   │   │   Woodpecker
+│   │   │   Blue jay
+│   │   │   Ostrich
+│   │   │   Penguin
+│   │   │   Raven
+│   │   │   Chicken
+│   │   │   Eagle
+│   │   │   Owl
+│   │   │   Duck
+│   │   │   Canary
+│   │   │   Goose
+│   │   │   Swan
+│   │   │   Falcon
+│   │   │   Parrot
+│   │   │   Sparrow
+│   │       Turkey
+│   │   Invertebrate
+│   │   │   Tick
+│   │   │   Centipede
+│   │   │   Marine invertebrates
+│   │   │   Insect
+│   │   │   Spider
+│   │   │   Oyster
+│   │   │   Snail
+│   │   │   Starfish
+│   │   │   Lobster
+│   │   │   Jellyfish
+│   │   │   Shrimp
+│   │   │   Crab
+│   │   │   Bee
+│   │   │   Beetle
+│   │   │   Ant
+│   │   │   Moths and butterflies
+│   │   │   Dragonfly
+│   │   │   Ladybug
+│   │   │   Caterpillar
+│   │       Butterfly
+│   │   Bat
+│   │   Carnivore
+│   │   │   Bear
+│   │   │   Cat
+│   │   │   Fox
+│   │   │   Jaguar
+│   │   │   Lynx
+│   │   │   Tiger
+│   │   │   Lion
+│   │   │   Dog
+│   │   │   Leopard
+│   │   │   Cheetah
+│   │   │   Otter
+│   │   │   Raccoon
+│   │   │   Brown bear
+│   │   │   Polar bear
+│   │       Teddy bear
+│   │   Camel
+│   │   Cattle
+│   │   Giraffe
+│   │   Rhinoceros
+│   │   Goat
+│   │   Horse
+│   │   Hamster
+│   │   Kangaroo
+│   │   Mouse
+│   │   Pig
+│   │   Rabbit
+│   │   Squirrel
+│   │   Sheep
+│   │   Zebra
+│   │   Monkey
+│   │   Deer
+│   │   Elephant
+│   │   Porcupine
+│   │   Bull
+│   │   Antelope
+│   │   Mule
+│   │   Marine mammal
+│   │   │   Dolphin
+│   │   │   Whale
+│   │   │   Sea lion
+│   │       Harbor seal
+│   │   Alpaca
+│   │   Reptile
+│   │   │   Dinosaur
+│   │   │   Lizard
+│   │   │   Snake
+│   │   │   Turtle
+│   │   │   Crocodile
+│   │   │   Frog
+│   │   │   Tortoise
+│   │       Sea turtle
+│   │   Fish
+│   │   │   Goldfish
+│   │   │   Shark
+│   │       Seahorse
+│       Shellfish
+│       │   Oyster
+│       │   Lobster
+│       │   Shrimp
+│           Crab
+│   Personal care
+│   │   Sunglasses
+│   │   Goggles
+│   │   Crutch
+│   │   Glasses
+│       Wheelchair
+│   Stretcher
+│   Musical instrument
+│   │   Organ
+│   │   Cello
+│   │   Drum
+│   │   Horn
+│   │   Guitar
+│   │   Harp
+│   │   Harpsichord
+│   │   Musical keyboard
+│   │   Oboe
+│   │   Piano
+│   │   Saxophone
+│   │   Trombone
+│   │   Trumpet
+│   │   Violin
+│   │   Flute
+│       Accordion
+│   Paddle
+│   Ball
+│   │   Football
+│   │   Cricket ball
+│   │   Volleyball
+│   │   Tennis ball
+│       Rugby ball
+│   Surfboard
+│   Baseball bat
+│   Punching bag
+│   Golf ball
+│   Lifejacket
+│   Scoreboard
+│   Snowboard
+│   Skateboard
+│   Ski
+│   Dumbbell
+│   Stationary bicycle
+│   Treadmill
+│   Bench
+│   Parachute
+│   Racket
+│   │   Tennis racket
+│       Table tennis racket
+│   Billiard table
+│   Tin can
+│   Barrel
+│   Picnic basket
+│   Waste container
+│   Beaker
+│   Ladder
+│   Screwdriver
+│   Wrench
+│   Flashlight
+│   Snowplow
+│   Nail
+│   Tripod
+│   Torch
+│   Camera
+│   Ruler
+│   Binoculars
+│   Weapon
+│   │   Bow and arrow
+│   │   Cannon
+│   │   Dagger
+│   │   Knife
+│   │   Rifle
+│   │   Shotgun
+│   │   Tank
+│   │   Handgun
+│   │   Sword
+│       Missile
+│   Headphones
+│   Laptop
+│   Computer keyboard
+│   Printer
+│   Mouse
+│   Computer monitor
+│   Power plugs and sockets
+│   Light switch
+│   Television
+│   Telephone
+│   │   Mobile phone
+│       Corded phone
+│   Tablet computer
+│   Microphone
+│   Drink
+│   │   Beer
+│   │   Cocktail
+│   │   Coffee
+│   │   Juice
+│   │   Tea
+│       Wine
+│   Bicycle wheel
+│   Door handle
+│   Door
+│   Window
+│   Stairs
+│   Porch
+│   Human eye
+│   Skull
+│   Human head
+│   Human face
+│   Human mouth
+│   Human ear
+│   Human nose
+│   Human hair
+│   Human hand
+│   Human foot
+│   Human arm
+│   Human leg
+│   Human beard
+│   Vehicle registration plate
+│   Wheel
+│   Seat belt
+│   Tire
+    Coconut
+
+
+
+
+
+Coin
+
+Flag
+
+Light bulb
+
+Doll
+
+Balloon
+
+Dice
+
+Kite
+
+Teddy bear
+
+Washing machine
+
+Toaster
+
+Oven
+
+Blender
+
+Gas stove
+
+Mechanical fan
+
+Kettle
+
+Refrigerator
+
+Wood-burning stove
+
+Mixer
+
+Coffeemaker
+
+Microwave oven
+
+Sewing machine
+
+Ceiling fan
+
+Sink
+
+Bidet
+
+Shower
+
+Tap
+
+Bathtub
+
+Toilet
+
+Scissors
+
+Poster
+
+Box
+
+Whiteboard
+
+Adhesive tape
+
+Ring binder
+
+Plastic bag
+
+Toilet paper
+
+Envelope
+
+Pen
+
+Paper towel
+
+Pillow
+
+Spatula
+
+Cutting board
+
+Drinking straw
+
+Measuring cup
+
+Chopsticks
+
+Teapot
+
+Mug
+
+Coffee cup
+
+Salt and pepper shakers
+
+Saucer
+
+Bottle
+
+Bowl
+
+Plate
+
+Pitcher
+
+Kitchen knife
+
+Jug
+
+Platter
+
+Wine glass
+
+Spoon
+
+Fork
+
+Serving tray
+
+Cake stand
+
+Frying pan
+
+Wok
+
+Oven
+
+Blender
+
+Slow cooker
+
+Food processor
+
+Refrigerator
+
+Mixer
+
+Coffeemaker
+
+Microwave oven
+
+Pressure cooker
+
+Fireplace
+
+Countertop
+
+Book
+
+Chair
+
+Cabinetry
+
+Desk
+
+Couch
+│   Sofa bed
+    Loveseat
+
+Nightstand
+
+Bookcase
+
+Bed
+│   Infant bed
+    studio couch
+
+Filing cabinet
+
+Table
+│   Coffee table
+    Kitchen & dining room table
+
+Chest of drawers
+
+Cupboard
+
+Bench
+
+Drawer
+
+Stool
+
+Shelf
+
+Wall clock
+
+Bathroom cabinet
+
+Dog bed
+
+Lantern
+
+Alarm clock
+
+Digital clock
+
+Wall clock
+
+Vase
+
+Window blind
+
+Curtain
+
+Mirror
+
+Snowman
+
+Bust
+
+Bronze sculpture
+
+Picture frame
+
+Candle
+
+Lamp
+
+Flowerpot
+
+Towel
+
+Beehive
+
+Tent
+
+Traffic light
+
+Billboard
+
+Stop sign
+
+Fire hydrant
+
+Fountain
+
+Street light
+
+Lighthouse
+
+Skyscraper
+
+Castle
+
+Tower
+
+House
+
+Office building
+
+Convenience store
+
+Swimming pool
+
+Man
+
+Woman
+
+Boy
+
+Girl
+
+Hot dog
+
+French fries
+
+Waffle
+
+Pancake
+
+Burrito
+
+Pretzel
+
+Popcorn
+
+Muffin
+
+Cookie
+
+Ice cream
+
+Cake
+
+Candy
+
+Guacamole
+
+Apple
+
+Grape
+
+Common fig
+
+Pear
+
+Strawberry
+
+Tomato
+
+Lemon
+
+Banana
+
+Orange
+
+Peach
+
+Mango
+
+Pineapple
+
+Grapefruit
+
+Pomegranate
+
+Watermelon
+
+Egg
+
+Bagel
+
+Bread
+
+Doughnut
+
+Croissant
+
+Tart
+
+Mushroom
+
+Pasta
+
+Pizza
+
+Shellfish
+│   Oyster
+│   Lobster
+│   Shrimp
+    Crab
+
+Taco
+
+Cucumber
+
+Radish
+
+Artichoke
+
+Potato
+
+Tomato
+
+Asparagus
+
+Squash
+│   Pumpkin
+    Zucchini
+
+Cabbage
+
+Carrot
+
+Salad
+
+Broccoli
+
+Bell pepper
+
+Winter melon
+
+Honeycomb
+
+Hamburger
+
+Submarine sandwich
+
+Sushi
+
+Houseplant
+
+Christmas tree
+
+Palm tree
+
+Maple
+
+Willow
+
+Lavender
+
+Rose
+
+Sunflower
+
+Lily
+
+Land vehicle
+│   Ambulance
+│   Cart
+│   Bicycle
+│   Bus
+│   Snowmobile
+│   Golf cart
+│   Motorcycle
+│   Segway
+│   Tank
+│   Train
+│   Truck
+│   Car
+│   Taxi
+│   Wheelchair
+│   Limousine
+    Van
+
+Watercraft
+│   Boat
+│   Jet ski
+│   Barge
+│   Gondola
+    Canoe
+
+Aircraft
+│   Helicopter
+│   Airplane
+    Rocket
+
+Shorts
+
+Dress
+
+Swimwear
+
+Brassiere
+
+Tiara
+
+Shirt
+
+Coat
+
+Suit
+
+Cowboy hat
+
+Fedora
+
+Sombrero
+
+Sun hat
+
+Scarf
+
+Miniskirt
+
+Jacket
+
+Baseball glove
+
+Belt
+
+Necklace
+
+Sock
+
+Earrings
+
+Tie
+
+Watch
+
+Umbrella
+
+Crown
+
+Swim cap
+
+Jeans
+
+Roller skates
+
+Boot
+
+High heels
+
+Sandal
+
+Sports uniform
+
+Backpack
+
+Suitcase
+
+Briefcase
+
+Handbag
+
+Bicycle helmet
+
+Football helmet
+
+Bird
+│   Woodpecker
+│   Blue jay
+│   Ostrich
+│   Penguin
+│   Raven
+│   Chicken
+│   Eagle
+│   Owl
+│   Duck
+│   Canary
+│   Goose
+│   Swan
+│   Falcon
+│   Parrot
+│   Sparrow
+    Turkey
+
+Invertebrate
+│   Tick
+│   Centipede
+│   Marine invertebrates
+│   Insect
+│   Spider
+│   Oyster
+│   Snail
+│   Starfish
+│   Lobster
+│   Jellyfish
+│   Shrimp
+│   Crab
+│   Bee
+│   Beetle
+│   Ant
+│   Moths and butterflies
+│   Dragonfly
+│   Ladybug
+│   Caterpillar
+    Butterfly
+
+Bat
+
+Carnivore
+│   Bear
+│   Cat
+│   Fox
+│   Jaguar
+│   Lynx
+│   Tiger
+│   Lion
+│   Dog
+│   Leopard
+│   Cheetah
+│   Otter
+│   Raccoon
+│   Brown bear
+│   Polar bear
+    Teddy bear
+
+Camel
+
+Cattle
+
+Giraffe
+
+Rhinoceros
+
+Goat
+
+Horse
+
+Hamster
+
+Kangaroo
+
+Mouse
+
+Pig
+
+Rabbit
+
+Squirrel
+
+Sheep
+
+Zebra
+
+Monkey
+
+Deer
+
+Elephant
+
+Porcupine
+
+Bull
+
+Antelope
+
+Mule
+
+Marine mammal
+│   Dolphin
+│   Whale
+│   Sea lion
+    Harbor seal
+
+Alpaca
+
+Reptile
+│   Dinosaur
+│   Lizard
+│   Snake
+│   Turtle
+│   Crocodile
+│   Frog
+│   Tortoise
+    Sea turtle
+
+Fish
+│   Goldfish
+│   Shark
+    Seahorse
+
+Shellfish
+│   Oyster
+│   Lobster
+│   Shrimp
+    Crab
+
+Sunglasses
+
+Goggles
+
+Crutch
+
+Glasses
+
+Wheelchair
+
+Stretcher
+
+Organ
+
+Cello
+
+Drum
+
+Horn
+
+Guitar
+
+Harp
+
+Harpsichord
+
+Musical keyboard
+
+Oboe
+
+Piano
+
+Saxophone
+
+Trombone
+
+Trumpet
+
+Violin
+
+Flute
+
+Accordion
+
+Paddle
+
+Football
+
+Cricket ball
+
+Volleyball
+
+Tennis ball
+
+Rugby ball
+
+Surfboard
+
+Baseball bat
+
+Punching bag
+
+Golf ball
+
+Lifejacket
+
+Scoreboard
+
+Snowboard
+
+Skateboard
+
+Ski
+
+Dumbbell
+
+Stationary bicycle
+
+Treadmill
+
+Bench
+
+Parachute
+
+Tennis racket
+
+Table tennis racket
+
+Billiard table
+
+Tin can
+
+Barrel
+
+Picnic basket
+
+Waste container
+
+Beaker
+
+Ladder
+
+Screwdriver
+
+Wrench
+
+Flashlight
+
+Snowplow
+
+Nail
+
+Tripod
+
+Torch
+
+Camera
+
+Ruler
+
+Binoculars
+
+Bow and arrow
+
+Cannon
+
+Dagger
+
+Knife
+
+Rifle
+
+Shotgun
+
+Tank
+
+Handgun
+
+Sword
+
+Missile
+
+Headphones
+
+Laptop
+
+Computer keyboard
+
+Printer
+
+Mouse
+
+Computer monitor
+
+Power plugs and sockets
+
+Light switch
+
+Television
+
+Mobile phone
+
+Corded phone
+
+Tablet computer
+
+Microphone
+
+Beer
+
+Cocktail
+
+Coffee
+
+Juice
+
+Tea
+
+Wine
+
+Bicycle wheel
+
+Door handle
+
+Door
+
+Window
+
+Stairs
+
+Porch
+
+Human eye
+
+Skull
+
+Human head
+
+Human face
+
+Human mouth
+
+Human ear
+
+Human nose
+
+Human hair
+
+Human hand
+
+Human foot
+
+Human arm
+
+Human leg
+
+Human beard
+
+Vehicle registration plate
+
+Wheel
+
+Seat belt
+
+Tire
+
+Coconut
+

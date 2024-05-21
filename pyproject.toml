@@ -19,6 +19,7 @@ torchviz = "^0.0.2"
 ultralytics-yolo = "^0.0.1"
 torchview = "^0.2.6"
 moviepy = "^1.0.3"
+fiftyone = "^0.23.8"
 
 
 [tool.poetry.group.dev.dependencies]
