@@ -12,3 +12,4 @@ datasets/coco128
 datasets/coco128-seg
 datasets/dota8
 datasets/misc_files
+datasets/seg
