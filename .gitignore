@@ -9,3 +9,4 @@ yolov8n.pt
 data
 .env
 yolov8n-seg.pt
+open_images
