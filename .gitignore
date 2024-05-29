@@ -14,3 +14,4 @@ datasets/dota8
 datasets/misc_files
 datasets/seg
 open_images
+datasets/segmentation
