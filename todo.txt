@@ -1,0 +1,5 @@
+1. Find total channels across all images     --> done
+2. Create mask and Polygons ---> done
+3. Image processing using Image Indexing
+4. Create new 3 channels which can be fed directly to mask-rcnn  ----> done
+5. Train a simple mask-rcnn model.
