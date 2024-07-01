@@ -1,6 +1,7 @@
 from typing import List
 import tifffile as tiff
 import numpy as np
+import pandas as pd 
 import geopandas as gpd
 import cv2, os
 from geopandas.geodataframe import GeoDataFrame
@@ -78,3 +79,19 @@ def create_masks():
         create_mask_polygons(height=height, width = width , polygons=polygons.loc[:, 'geometry'], save_path=f'{dir}/train_mask{num}')
     
     return
+
+def create_df(dir:str ='data' , is_train :bool = True):
+    df = pd.DataFrame(columns = ['img', 'mask'])
+    
+    prefix = 'train' if is_train else 'test'
+    for i in range(50):
+        img = f'{prefix}_{i}.tif'
+        mask = f'{prefix}_mask{i}.npy' if is_train else ''
+        df.loc[i] = [img, mask]
+        
+    df.to_csv(f'{dir}/{prefix}_df.csv', index = False)
+
+if not os.path.exists('data/train_df.csv'):
+    create_df()
+    create_df(is_train = False)
+    print('Dataframes created successfully')

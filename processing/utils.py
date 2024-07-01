@@ -1,6 +1,7 @@
 import zipfile
 import os
 import logging
+import yaml
 from colorama import Fore, Style, init
 # Initialize colorama
 init(autoreset=True)
@@ -12,6 +13,11 @@ def extract_zip(zip_path, dest_dir):
         zip_ref.extractall(dest_dir)
         print(f"Extracted all files to {dest_dir}")
 
+
+def read_yaml_file(file_path):
+    with open(file_path, 'r') as file:
+        data = yaml.safe_load(file)
+    return data
 
 def assert_(condition: bool , message: str):
     assert condition, Fore.RED + message + Style.RESET_ALL

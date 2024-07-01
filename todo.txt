@@ -3,3 +3,9 @@
 3. Image processing using Image Indexing
 4. Create new 3 channels which can be fed directly to mask-rcnn  ----> done
 5. Train a simple mask-rcnn model.
+
+
+
+a. Change Criterion
+b. Wrap model in a class
+c. Set Model for training
