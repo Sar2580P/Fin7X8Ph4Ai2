@@ -68,7 +68,7 @@ class SegmentationDataset(Dataset):
         
         if self.mask_dir :
             mask = np.load(os.path.join(self.mask_dir, mask_name))
-        else : 
+        else : # for test data
             mask = np.zeros((image.height, image.width), dtype=np.uint8)
 
         sample = self.pre_transforms(image=image.read(), mask=mask)

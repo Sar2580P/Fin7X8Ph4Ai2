@@ -1,4 +1,0 @@
-datamodule : 
-  BATCH_SIZE : 32
-  NUM_WORKERS : 4
-  

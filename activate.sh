@@ -19,6 +19,6 @@ echo -e "\n\nActivating the working environment..."
 # else
 #   wandb login --relogin "$Ishan_WANDB_API"
 # fi
-
+export PYTHONPATH="${PYTHONPATH}:$(pwd)"
 poetry shell
 

@@ -91,7 +91,10 @@ def create_df(dir:str ='data' , is_train :bool = True):
         
     df.to_csv(f'{dir}/{prefix}_df.csv', index = False)
 
-if not os.path.exists('data/train_df.csv'):
-    create_df()
-    create_df(is_train = False)
-    print('Dataframes created successfully')
+
+if __name__ == '__main__':
+  
+  if not os.path.exists('data/train_df.csv'):
+      create_df()
+      create_df(is_train = False)
+      print('Dataframes created successfully')
