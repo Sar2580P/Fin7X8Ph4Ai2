@@ -7,13 +7,15 @@ import os
 from training.callbacks import early_stop_callback, checkpoint_callback, rich_progress_bar, rich_model_summary
 from processing.utils import read_yaml_file
 
-data_module = SegmentationDataModule(loader_config_path='configs/loader_config.yaml')
+data_module = SegmentationDataModule(loader_config_path='configs/trainer.yaml')
 model = UNet_Variants(config_path='configs/unet_family.yaml')
+model.get_model()
 
-segmentation_setup = FieldInstanceSegment(config_path='unet_family.yaml', model=model)
+segmentation_setup = FieldInstanceSegment(config_path='configs/trainer.yaml', model=model)
 
 #_____________________________________________________________________________________________________________
 training_config = read_yaml_file('configs/trainer.yaml')
+print(training_config['dir'], model.name)
 checkpoint_callback.dirpath = os.path.join(training_config['dir'], 'ckpts', model.name)
 checkpoint_callback.filename = training_config['ckpt_file_name']
 
@@ -23,7 +25,7 @@ csv_logger = CSVLogger(training_config['dir']+f"/{model.name}/"+'/logs/'+  train
 
 #_____________________________________________________________________________________________________________
 trainer = Trainer(callbacks=[early_stop_callback, checkpoint_callback, rich_progress_bar, rich_model_summary], 
-                  accelerator = 'gpu' ,max_epochs=training_config['MAX_EPOCHS'], logger=[wandb_logger, csv_logger])  
+                  accelerator = 'cpu' ,max_epochs=training_config['MAX_EPOCHS'], logger=[wandb_logger, csv_logger])  
  
-trainer.fit(model, datamodule=data_module)
+trainer.fit(model=segmentation_setup, datamodule=data_module)
 trainer.test(datamodule=data_module)

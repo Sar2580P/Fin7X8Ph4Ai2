@@ -1,5 +1,5 @@
 encoder_name : 'resnet18'
 encoder_weights: "imagenet"     # use `imagenet` pre-trained weights for encoder initialization
 in_channels: 3                  # model input channels (1 for gray-scale images, 3 for RGB, etc.)
-classes: 2                      # num_classes : (boundary , field_area)
+classes: 1                      # num_classes : (boundary , field_area)
 apply_preprocessing : False     # adapt images to encoder's weights

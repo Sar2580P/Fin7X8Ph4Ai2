@@ -4,18 +4,19 @@ import numpy as np
 import os
 from processing.utils import read_yaml_file
 from tqdm import tqdm
+from torchmetrics.classification import Dice
+from training.models import UNet_Variants 
 
 class FieldInstanceSegment(pl.LightningModule):
-  def __init__(self, results_dir: str , model:torch.nn, config_path:str):
+  def __init__(self, model:UNet_Variants, config_path:str):
     super().__init__()
     self.model = model
     self.config = read_yaml_file(config_path)
+    self.results_dir = self.config['dir']+'/output_masks'    
+    if not os.path.exists(self.results_dir):
+      os.makedirs(self.results_dir)
     
-    if not os.path.exists(results_dir):
-      os.makedirs(results_dir)
-    self.results_dir = results_dir
-
-    self.criterion = torch.nn.CrossEntropyLoss()
+    self.criterion = Dice(average='micro')
 
   
   def training_step(self, batch, batch_idx):
@@ -50,7 +51,7 @@ class FieldInstanceSegment(pl.LightningModule):
 
     
   def configure_optimizers(self):
-    optim =  torch.optim.Adam(lr = self.config['lr'], weight_decay = self.config['weight_decay'])   # https://pytorch.org/docs/stable/optim.html
+    optim =  torch.optim.Adam(params=self.model.model.parameters(), lr = self.config['lr'], weight_decay = self.config['weight_decay'])   # https://pytorch.org/docs/stable/optim.html
     lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optim, patience=3, factor=0.7, threshold=0.005, 
                                                               cooldown =2,verbose=True)
     # lr_scheduler = torch.optim.lr_scheduler.ExponentialLR(optim,gamma = 0.995 ,last_epoch=-1,   verbose=True)

@@ -1,8 +1,8 @@
 dir : 'results'
-MAX_EPOCHS : 10
+MAX_EPOCHS : 1
 BATCH_SIZE : 32
-lr : 1e-4
-weight_decay : 1e-6
+lr : !!float 1e-4
+weight_decay : !!float 1e-6
 NUM_WORKERS : 4
 img_dir : 'data/3channel_images'
 mask_dir : 'data/masks'
