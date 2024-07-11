@@ -22,7 +22,7 @@ class FieldInstanceSegment(pl.LightningModule):
   def training_step(self, batch, batch_idx):
     x, ground_mask = batch['image'], batch['mask']
     pred_mask = self.model.forward(x)
-    loss = self.criterion(pred_mask, ground_mask)
+    loss = 1- self.criterion(pred_mask, ground_mask)
     self.log("train_loss", loss, on_step = False, on_epoch=True, prog_bar=True, logger=True)
     
     return loss
@@ -30,14 +30,14 @@ class FieldInstanceSegment(pl.LightningModule):
   def validation_step(self, batch, batch_idx):
     x, ground_mask = batch['image'], batch['mask']
     pred_mask = self.model.forward(x)
-    loss = self.criterion(pred_mask, ground_mask)
+    loss = 1- self.criterion(pred_mask, ground_mask)
     self.log("val_loss", loss, on_epoch=True, prog_bar=True, logger=True)
     return loss
   
   def test_step(self, batch, batch_idx):
     x, ground_mask = batch['image'], batch['mask']
     pred_mask = self.model.forward(x)
-    loss = self.criterion(pred_mask, ground_mask)
+    loss = 1- self.criterion(pred_mask, ground_mask)
     self.log("test_loss", loss, on_epoch=True, prog_bar=True, logger=True)
     return loss
   

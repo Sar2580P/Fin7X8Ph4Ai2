@@ -15,7 +15,7 @@ segmentation_setup = FieldInstanceSegment(config_path='configs/trainer.yaml', mo
 
 #_____________________________________________________________________________________________________________
 training_config = read_yaml_file('configs/trainer.yaml')
-print(training_config['dir'], model.name)
+
 checkpoint_callback.dirpath = os.path.join(training_config['dir'], 'ckpts', model.name)
 checkpoint_callback.filename = training_config['ckpt_file_name']
 
