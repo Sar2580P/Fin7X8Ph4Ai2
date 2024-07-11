@@ -92,9 +92,38 @@ def create_df(dir:str ='data' , is_train :bool = True):
     df.to_csv(f'{dir}/{prefix}_df.csv', index = False)
 
 
+def apply_3_channel_preprocessing():
+    source_dir = 'data/original_images'
+    output_dir = 'data/3channel_images'
+    if not os.path.exists(output_dir):
+        os.mkdir(output_dir)
+        
+    channel_indices = [4,5,6]
+    for file_name in tqdm(os.listdir(source_dir),desc=f'Selecting channels: {channel_indices}'):
+        if file_name.lower().endswith('.tif'):
+            img_path = os.path.join(source_dir , file_name)         
+            # Process the image
+            try:
+                save_path = os.path.join(output_dir, file_name)
+                take_3_channels(channel_indices=channel_indices, img_path = img_path, save_path= save_path)
+                # print(f"Processed {img_path} and saved to {output_path}")
+            except ValueError as e:
+                print(f"Error processing {img_path}: {e}")
+      
+      
+      
 if __name__ == '__main__':
   
   if not os.path.exists('data/train_df.csv'):
       create_df()
       create_df(is_train = False)
       print('Dataframes created successfully')
+      
+  if not os.path.exists('data/masks'):
+      create_masks()
+      print('Masks created successfully')
+      
+  if not os.path.exists('data/3channel_images'):
+      apply_3_channel_preprocessing()
+      print('3 channel images created successfully')
+  
