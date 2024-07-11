@@ -8,6 +8,7 @@ from training.callbacks import early_stop_callback, checkpoint_callback, rich_pr
 from processing.utils import read_yaml_file
 
 data_module = SegmentationDataModule(loader_config_path='configs/trainer.yaml')
+
 model = UNet_Variants(config_path='configs/unet_family.yaml')
 model.get_model()
 
@@ -24,8 +25,8 @@ wandb_logger = WandbLogger(project= f"{model.name}", name = training_config['ckp
 csv_logger = CSVLogger(training_config['dir']+f"/{model.name}/"+'/logs/'+  training_config['ckpt_file_name'])
 
 #_____________________________________________________________________________________________________________
-trainer = Trainer(callbacks=[early_stop_callback, checkpoint_callback, rich_progress_bar, rich_model_summary], 
-                  accelerator = 'cpu' ,max_epochs=training_config['MAX_EPOCHS'], logger=[wandb_logger, csv_logger])  
- 
+trainer = Trainer(callbacks=[early_stop_callback, checkpoint_callback, rich_progress_bar, rich_model_summary],
+                  accelerator = 'gpu' ,max_epochs=training_config['MAX_EPOCHS'], logger=[wandb_logger, csv_logger])
+
 trainer.fit(model=segmentation_setup, datamodule=data_module)
 trainer.test(datamodule=data_module)
