@@ -15,7 +15,7 @@ class UNet_Variants(BaseModel):
     def get_model(self):
         self.config = read_yaml_file(self.config_path)
         self.name = f"UNet__E-{self.config['encoder_name']}__W-{self.config['encoder_weights']}__C-{self.config['in_channels']}"
-        
+
         self.model = smp.Unet(
                     encoder_name=self.config['encoder_name'],        # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
                     encoder_weights=self.config['encoder_weights'],     # use `imagenet` pre-trained weights for encoder initialization
@@ -23,21 +23,23 @@ class UNet_Variants(BaseModel):
                     classes=self.config['classes'],                      # model output channels (number of classes in your dataset)
                 )
         self.preproc_func = get_preprocessing_fn(self.config['encoder_name'], self.config['encoder_weights'])
-    
-    model_config = ConfigDict(arbitrary_types_allowed=True)  
-    
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     def forward(self, x)->torch.Tensor :
         if self.config['apply_preprocessing']:
             x = self.preproc_func(x)
-        
+
         # output : torch.Size([batch_sz, num_classes, h, w])
-        return self.model(x)
-    
-    
+        x = self.model(x)
+        x = torch.sigmoid(x)  # Ensure it's between 0 and 1
+        x = x.squeeze(1)
+        return x
+
 if __name__ == '__main__':
     unet = UNet_Variants(config_path='configs/unet_family.yaml')
     unet.get_model()
-    
+
     input_ = torch.rand((1, 3, 224, 224))
     output = unet.forward(input_)
     print(output.shape)

@@ -9,6 +9,7 @@ from processing.utils import read_yaml_file
 
 data_module = SegmentationDataModule(loader_config_path='configs/trainer.yaml')
 
+
 model = UNet_Variants(config_path='configs/unet_family.yaml')
 model.get_model()
 
@@ -28,5 +29,14 @@ csv_logger = CSVLogger(training_config['dir']+f"/{model.name}/"+'/logs/'+  train
 trainer = Trainer(callbacks=[early_stop_callback, checkpoint_callback, rich_progress_bar, rich_model_summary],
                   accelerator = 'gpu' ,max_epochs=training_config['MAX_EPOCHS'], logger=[wandb_logger, csv_logger])
 
-trainer.fit(model=segmentation_setup, datamodule=data_module)
-trainer.test(datamodule=data_module)
+data_module.setup(stage="fit")
+trainer.fit(model = segmentation_setup , train_dataloaders=data_module.train_dataloader(),
+            val_dataloaders=data_module.val_dataloader())
+
+data_module.setup(stage="test")
+trainer.test(dataloaders=data_module.test_dataloader())
+
+data_module.setup(stage="predict")
+trainer.predict(dataloaders=data_module.predict_dataloader())
+
+#_____________________________________________________________________________________________________________

@@ -23,11 +23,12 @@ class SegmentationDataModule(L.LightningDataModule):
         # Assign test dataset for use in dataloader(s)
         if stage == "test":
             self.test_set = SegmentationDataset(samples=df_tr,  img_dir=self.loader_config['img_dir'],
+                                                mask_dir=self.loader_config['mask_dir'],
                                                 config_path= 'configs/processing.yaml', apply_transform=False, in_train_mode=False)
 
         if stage == "predict":
             df_tst = pd.read_csv('data/test_df.csv')
-            self.predict_set = SegmentationDataset(samples=df_tst,  mask_dir=self.loader_config['mask_dir'], img_dir=self.loader_config['img_dir'],
+            self.predict_set = SegmentationDataset(samples=df_tst, img_dir=self.loader_config['img_dir'],
                                                 config_path= 'configs/processing.yaml', apply_transform=False, in_train_mode=False)
 
     def train_dataloader(self):

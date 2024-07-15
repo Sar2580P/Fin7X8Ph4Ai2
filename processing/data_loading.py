@@ -69,7 +69,7 @@ class SegmentationDataset(Dataset):
         if self.mask_dir :
             mask = np.load(os.path.join(self.mask_dir, mask_name))
         else : # for test data
-            mask = np.zeros((image.shape), dtype=np.uint8)
+            mask = np.zeros((image.shape)[:-1], dtype=np.uint8)
 
         sample = self.pre_transforms(image=image, mask=mask)
         # apply augmentations
@@ -87,9 +87,10 @@ class SegmentationDataset(Dataset):
         #     mask = (mask > 0).astype(np.uint8)
         #     mask = torch.from_numpy(mask)
         # image.close()
+
         return {
-            "image": sample["image"],
-            "mask": sample["mask"].float(),
+            "image": sample["image"].float(),
+            "mask": sample["mask"].long(),
             "image_name" : image_name.split('.')[0]
         }
 
