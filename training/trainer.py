@@ -55,7 +55,8 @@ data_module.setup(stage="test")
 trainer.test(dataloaders=data_module.test_dataloader())
 
 data_module.setup(stage="predict")
-trainer.predict(dataloaders=data_module.predict_dataloader())
+trainer.predict(dataloaders=data_module.predict_dataloader())  
+trainer.predict(dataloaders=data_module.val_dataloader())
 
 #_____________________________________________________________________________________________________________
 
