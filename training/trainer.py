@@ -9,6 +9,8 @@ from processing.utils import read_yaml_file
 import wandb 
 
 data_module = SegmentationDataModule(loader_config_path='configs/trainer.yaml')
+
+
 model = UNet_Variants(config_path='configs/unet_family.yaml')
 model.get_model()
 
@@ -42,15 +44,17 @@ def log_images(logger:WandbLogger):
     logger.log_table(key="Test Samples", columns=test_cols, data=test_data)
 
 #_____________________________________________________________________________________________________________
-trainer = Trainer(callbacks=[early_stop_callback, checkpoint_callback, rich_progress_bar, rich_model_summary], 
-                  accelerator = 'cpu' ,max_epochs=training_config['MAX_EPOCHS'], logger=[wandb_logger, csv_logger])  
- 
-trainer.fit(model=segmentation_setup, datamodule=data_module)
-trainer.test(datamodule=data_module)
+trainer = Trainer(callbacks=[early_stop_callback, checkpoint_callback, rich_progress_bar, rich_model_summary],
+                  accelerator = 'gpu' ,max_epochs=training_config['MAX_EPOCHS'], logger=[wandb_logger, csv_logger])
+
+data_module.setup(stage="fit")
+trainer.fit(model = segmentation_setup , train_dataloaders=data_module.train_dataloader(),
+            val_dataloaders=data_module.val_dataloader())
+
+data_module.setup(stage="test")
+trainer.test(dataloaders=data_module.test_dataloader())
+
+data_module.setup(stage="predict")
+trainer.predict(dataloaders=data_module.predict_dataloader())
 
 #_____________________________________________________________________________________________________________
-# logging hyper-parameters
-wandb_logger.log_hyperparams(training_config)
-
-# logging images
-log_images(wandb_logger)

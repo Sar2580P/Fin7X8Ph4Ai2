@@ -11,11 +11,11 @@ fi
 echo -e "\n\nActivating the working environment..."
 
 
-# source .env
+source .env
 # read  -p "Enter wandb preference : " wandb_usr
 # echo "Setting up wandb..."
 # if [ $wandb_usr == "sarvagya" ]; then
-#   wandb login --relogin "$Sarvagya_WANDB_API"
+wandb login --relogin "$WANDB_API"
 # else
 #   wandb login --relogin "$Ishan_WANDB_API"
 # fi

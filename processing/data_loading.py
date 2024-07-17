@@ -14,8 +14,8 @@ class SegmentationDataset(Dataset):
         self,
         samples: pd.DataFrame,
         img_dir:str ,
-        config_path:str, 
-        mask_dir:str = None, 
+        config_path:str,
+        mask_dir:str = None,
         apply_transform:bool = True,
         in_train_mode:bool = True
     ) -> None:
@@ -25,7 +25,7 @@ class SegmentationDataset(Dataset):
         self.mask_dir = mask_dir
         self.img_dir = img_dir
         self.config = read_yaml_file(config_path)
-        
+
     @property
     def train_transforms(self):
         return A.Compose([
@@ -35,7 +35,7 @@ class SegmentationDataset(Dataset):
             A.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225], max_pixel_value=255.0, p=1),
             ToTensorV2()
         ])
-        
+
     # @property
     # def val_transforms(self):
     #     return A.Compose([
@@ -50,8 +50,8 @@ class SegmentationDataset(Dataset):
         return A.Compose([
             ToTensorV2()
         ])
-        
-    @property    
+
+    @property
     def pre_transforms(self):
         return A.Compose([
                     A.Resize(self.config['img_sz'], self.config['img_sz'], p=1)
@@ -64,34 +64,35 @@ class SegmentationDataset(Dataset):
         # idx = idx % len(self.samples)
 
         image_name, mask_name = self.samples.loc[idx, 'img'] , self.samples.loc[idx, 'mask']
-        image = rasterio.open(os.path.join(self.img_dir, image_name))
-        
+        image = rasterio.open(os.path.join(self.img_dir, image_name)).read()
+        image =np.transpose(image, (1, 2, 0))
         if self.mask_dir :
             mask = np.load(os.path.join(self.mask_dir, mask_name))
         else : # for test data
-            mask = np.zeros((image.height, image.width), dtype=np.uint8)
+            mask = np.zeros((image.shape)[:-1], dtype=np.uint8)
 
-        sample = self.pre_transforms(image=image.read(), mask=mask)
+        sample = self.pre_transforms(image=image, mask=mask)
         # apply augmentations
         if self.apply_transform:
             if self.in_train_mode:
                 sample = self.train_transforms(image=sample['image'], mask=sample['mask'])
             # else:
             #     sample = self.val_transforms(image=sample['image'], mask=sample['mask'])
-            
+
         # apply post transforms
         sample = self.post_transforms(image=sample['image'], mask=sample['mask'])
-        
+
         # sample = self.transform(image=image, mask=mask)
-        #     img, mask = , 
+        #     img, mask = ,
         #     mask = (mask > 0).astype(np.uint8)
         #     mask = torch.from_numpy(mask)
-        image.close()
+        # image.close()
+
         return {
-            "image": sample["image"],
-            "masks": sample["mask"].float(),
+            "image": sample["image"].float(),
+            "mask": sample["mask"].long(),
             "image_name" : image_name.split('.')[0]
         }
-    
-    
+
+
 
