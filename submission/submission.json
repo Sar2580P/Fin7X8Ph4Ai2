@@ -1,7 +1,7 @@
 {
     "images": [
         {
-            "file_name": "train_mask0.tif",
+            "file_name": "test_0.tif",
             "annotations": [
                 {
                     "class": "field",

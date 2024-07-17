@@ -7,7 +7,7 @@
 
 
 a. Change Criterion ---> Use DICE Loss or Cross-entropy Loss   ---> done
-a1. Use the metric in competition for judging
-b. Wrap model in a class  ---> done
+a1. Use the metric in competition for judging    ---> *
+b. Wrap model in a class  ---> done      
 c. Set Model for training
 d. Use all tiff channels with 1x1 conv head after input
