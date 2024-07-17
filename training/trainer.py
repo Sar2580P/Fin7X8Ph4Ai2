@@ -58,3 +58,9 @@ data_module.setup(stage="predict")
 trainer.predict(dataloaders=data_module.predict_dataloader())
 
 #_____________________________________________________________________________________________________________
+
+# log hyperparameters
+wandb_logger.log_hyperparams(training_config)
+
+# log images
+log_images(wandb_logger)
