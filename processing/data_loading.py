@@ -29,11 +29,11 @@ class SegmentationDataset(Dataset):
     @property
     def train_transforms(self):
         return A.Compose([
-            A.LongestMaxSize(max_size=800, p=1),
-            A.PadIfNeeded(min_height=800, min_width=800, border_mode=A.cv2.BORDER_CONSTANT, value=0, mask_value=0, p=1),
-            A.HorizontalFlip(p=0.5),
-            A.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225], max_pixel_value=255.0, p=1),
-            ToTensorV2()
+            # A.LongestMaxSize(max_size=800, p=1),
+            # A.PadIfNeeded(min_height=800, min_width=800, border_mode=A.cv2.BORDER_CONSTANT, value=0, mask_value=0, p=1),
+            A.Rotate(limit=10, p=0.6),
+            A.HorizontalFlip(p=0.6),
+            # A.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225], max_pixel_value=255.0, p=1),
         ])
 
     # @property
@@ -42,7 +42,6 @@ class SegmentationDataset(Dataset):
     #         A.LongestMaxSize(max_size=800, p=1),
     #         A.PadIfNeeded(min_height=800, min_width=800, border_mode=A.cv2.BORDER_CONSTANT, value=0, mask_value=0, p=1),
     #         A.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225], max_pixel_value=255.0, p=1),
-    #         ToTensorV2()
     #     ])
 
     @property

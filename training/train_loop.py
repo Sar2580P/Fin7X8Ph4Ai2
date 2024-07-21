@@ -5,7 +5,7 @@ import os
 from processing.utils import read_yaml_file
 from tqdm import tqdm
 from torchmetrics.classification import Dice
-from training.models import UNet_Variants
+from training.modelling.models import UNet_Variants
 
 class FieldInstanceSegment(pl.LightningModule):
   def __init__(self, model:UNet_Variants, config_path:str):

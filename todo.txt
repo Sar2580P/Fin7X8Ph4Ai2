@@ -10,4 +10,26 @@ a. Change Criterion ---> Use DICE Loss or Cross-entropy Loss   ---> done
 a1. Use the metric in competition for judging    ---> done
 b. Wrap model in a class  ---> done      
 c. Set Model for training   ---> done
-d. Use all tiff channels with 1x1 conv head after input   
+
+
+1. apply albumentation to train data    ---> data
+2. Use some pretext data, then fine-tune on given data  ---> the current pretext data is very poor
+3. Image pre-processing... of tif channels
+
+
+UNET ------->
+(see table with available weights for each encoder_name)
+decoder_attention_type
+activation 
+
+UNET++ -------->
+Decoder of Unet++ is more complex than in usual Unet.
+
+______________________________________________________________________________________________________
+Tomoro's tasks--->
+- Check if image logging properly in wandb
+- Create DAFPN module  ---> done
+- Read the 6 papers on desktop, make notes from them   ----> done
+- Finalise modelling strategies and combinations    ---
+- Wrap each model in class and train on main data   ---
+- MMU-Net implementation ---> will see it later

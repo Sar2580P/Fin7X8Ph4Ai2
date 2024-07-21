@@ -20,5 +20,6 @@ wandb login --relogin "$WANDB_API"
 #   wandb login --relogin "$Ishan_WANDB_API"
 # fi
 export PYTHONPATH="${PYTHONPATH}:$(pwd)"
+export PYTHONPATH="${PYTHONPATH}:/home/${user_name}/detectron2"
 poetry shell
 

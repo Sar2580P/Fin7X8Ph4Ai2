@@ -1,5 +1,5 @@
 from training.data_module import SegmentationDataModule
-from training.models import UNet_Variants
+from training.modelling.models import UNet_Variants
 from training.train_loop import FieldInstanceSegment
 from pytorch_lightning import Trainer
 from pytorch_lightning.loggers import WandbLogger, CSVLogger
