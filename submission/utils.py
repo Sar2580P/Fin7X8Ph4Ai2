@@ -42,6 +42,15 @@ def create_submission_json(test_mask_dir:str = 'results/output_masks'):
         json.dump( {'images' :submission}, f)
     return
 
+from submission.pq_score_calculate import get_score_for_all_images
+from processing.utils import logger
+import pickle 
 if __name__ == '__main__':
-    create_submission_json()
+    # create_submission_json()
     print('Submission JSON created successfully!')
+    
+    ground_truth = json.load(open('data/train_annotation.json'))
+    prediction = json.load(open('submission/submission.json'))
+    scores = get_score_for_all_images(ground_truth['images'][:4], prediction['images'][:4])
+
+    pickle.dump(scores, open('submission/scores.pkl', 'wb'))

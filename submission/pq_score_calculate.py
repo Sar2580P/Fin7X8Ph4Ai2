@@ -1,6 +1,8 @@
 from shapely.geometry import Polygon
 import numpy as np
 from tqdm import tqdm
+from typing import List
+from processing.utils import logger
 
 
 def getIOU(polygon1: Polygon, polygon2: Polygon) -> float:
@@ -48,7 +50,35 @@ def compute_pq(gt_polygons: list, pred_polygons: list, iou_threshold=0.5):
     return pq, sq, rq
 
 
+def get_polygons_from_annot(annot:List):
+    polygons = []
+    for instance in annot:
+        coords = instance['segmentation']
+        polygon = Polygon([(coords[i], coords[i+1]) for i in range(0, len(coords), 2)])
+        polygons.append(polygon)
+    return polygons
 
+
+def get_score_for_all_images(gt_annots :List, pred_annots:List)->dict:
+    pq_scores = {}
+
+    for gt_annot , pred_annot in zip(gt_annots, pred_annots):
+        gt_polygons = get_polygons_from_annot(gt_annot['annotations'])
+        pred_polygons = get_polygons_from_annot(pred_annot['annotations'])
+        assert gt_annot['file_name'] == pred_annot['file_name'] , 'file names are not same'
+        try:
+            pq, sq, rq = compute_pq(gt_polygons, pred_polygons)
+            pq_scores[gt_annot['file_name']] = {'pq': pq, 'sq': sq, 'rq': rq}
+            logger.info(f"{gt_annot['file_name']} : pq: {pq}, sq: {sq}, rq: {rq}")
+        except Exception as e:
+            logger.error(f'Error in calculating pq score for {gt_annot["file_name"]}')
+            logger.debug(e)
+            
+    return pq_scores
+        
+    
+    
+    
 def test_compute_pq():
     polygon1 = Polygon([(1, 2), (2, 4), (3, 1)])
     polygon2 = Polygon([(0, 0), (1, 3), (2, 2), (3, 0)])
@@ -93,6 +123,4 @@ def test_same_score_with_dif_order():
     assert pq1 == pq2
     assert sq1 == sq2
     assert rq1 == rq2
-    
-    
     
