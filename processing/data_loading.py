@@ -1,8 +1,6 @@
 from pathlib import Path
 from typing import List, Dict, Any, Tuple
 import pandas as pd, os
-import albumentations as A
-from albumentations.pytorch import ToTensorV2
 from torchvision import transforms
 from torchvision.transforms import AutoAugment, AutoAugmentPolicy
 import numpy as np
@@ -28,6 +26,7 @@ class SegmentationDataset(Dataset):
         self.mask_dir = mask_dir
         self.img_dir = img_dir
         self.config = read_yaml_file(config_path)
+
     #changed everything to pytorch implementations, don't know if normalize will work if it works then fine else remove it
     @property
     def train_transforms(self):
