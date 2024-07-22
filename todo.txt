@@ -27,9 +27,18 @@ Decoder of Unet++ is more complex than in usual Unet.
 
 ______________________________________________________________________________________________________
 Tomoro's tasks--->
-- Check if image logging properly in wandb
 - Create DAFPN module  ---> done
 - Read the 6 papers on desktop, make notes from them   ----> done
 - Finalise modelling strategies and combinations    ---
-- Wrap each model in class and train on main data   ---
+- Wrap each model in class and train on main data   ---> done
 - MMU-Net implementation ---> will see it later
+
+
+Tasks--->
+- Create data with same pixel size
+- Apply augmentation:
+        - auto
+        - selection
+- Check if image logging properly in wandb
+- Other models (except mask-rcnn) run for the data, 
+- create report

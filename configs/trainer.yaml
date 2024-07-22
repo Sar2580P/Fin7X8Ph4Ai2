@@ -7,6 +7,7 @@ NUM_WORKERS : 4
 img_dir : 'data/3channel_images'
 mask_dir : 'data/masks'
 ckpt_file_name : 'Epoch-{epoch}__Loss-{val_loss:.2f}'
+plot_masks : 5
 
 # CALLBACK related config
 callbacks:

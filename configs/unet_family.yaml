@@ -1,5 +1,46 @@
-encoder_name : 'resnet18'
-encoder_weights: "imagenet"     # use `imagenet` pre-trained weights for encoder initialization
-in_channels: 3                  # model input channels (1 for gray-scale images, 3 for RGB, etc.)
-classes: 1                      # num_classes : (boundary , field_area)
-apply_preprocessing : False     # adapt images to encoder's weights
+model_name : 'UnetPlusPlus'
+
+UnetPlusPlus_config :
+  encoder_name: "resnet34"
+  encoder_depth: 5
+  encoder_weights: "imagenet"
+  decoder_use_batchnorm: True
+  # decoder_channels:  (256, 128, 64, 32, 16)
+  # decoder_attention_type: None
+  in_channels: 3
+  classes: 1
+
+
+Unet_config :
+  encoder_name : 'resnet34'
+  encoder_weights: "imagenet"     # use `imagenet` pre-trained weights for encoder initialization
+  in_channels: 3                  # model input channels (1 for gray-scale images, 3 for RGB, etc.)
+  classes: 1                      # num_classes : (boundary , field_area)
+  apply_preprocessing : False     # adapt images to encoder's weights
+
+
+FPN_config :
+  encoder_name: 'resnet34'
+  encoder_depth: 5
+  encoder_weights: 'imagenet'
+  decoder_pyramid_channels: 256
+  decoder_segmentation_channels: 128 
+  decoder_merge_policy: 'add'
+  decoder_dropout: 0.2
+  in_channels: 3 
+  classes: 1
+  # activation: None
+  upsampling: 4
+  # aux_params=None
+
+
+DeepLabV3_config :
+    encoder_name:  "resnet34"
+    encoder_depth:  5
+    encoder_weights: "imagenet"
+    decoder_channels:  256
+    in_channels: 3
+    classes:  1
+    # activation: Optional[str] = None,
+    upsampling:  8
+    # aux_params: Optional[dict] = None,
