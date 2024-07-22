@@ -3,11 +3,14 @@ from typing import List, Dict, Any, Tuple
 import pandas as pd, os
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
+from torchvision import transforms
+from torchvision.transforms import AutoAugment, AutoAugmentPolicy
 import numpy as np
 import torch
 from torch.utils.data import Dataset
 import rasterio
 from processing.utils import read_yaml_file
+
 
 class SegmentationDataset(Dataset):
     def __init__(
@@ -28,12 +31,11 @@ class SegmentationDataset(Dataset):
 
     @property
     def train_transforms(self):
-        return A.Compose([
-            # A.LongestMaxSize(max_size=800, p=1),
-            # A.PadIfNeeded(min_height=800, min_width=800, border_mode=A.cv2.BORDER_CONSTANT, value=0, mask_value=0, p=1),
-            A.Rotate(limit=10, p=0.6),
-            A.HorizontalFlip(p=0.6),
-            # A.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225], max_pixel_value=255.0, p=1),
+        return transforms.Compose([
+            transforms.RandomRotation(degrees=10),
+            transforms.RandomHorizontalFlip(p=0.6),
+            AutoAugment(policy=AutoAugmentPolicy.IMAGENET),
+            transforms.ToTensor()
         ])
 
     # @property
@@ -46,15 +48,15 @@ class SegmentationDataset(Dataset):
 
     @property
     def post_transforms(self):
-        return A.Compose([
-            ToTensorV2()
+        return transforms.Compose([
+            transforms.ToTensor()
         ])
 
     @property
     def pre_transforms(self):
-        return A.Compose([
-                    A.Resize(self.config['img_sz'], self.config['img_sz'], p=1)
-                ])
+        return transforms.Compose([
+            transforms.Resize((self.config['img_sz'], self.config['img_sz']))
+        ])
 
     def __len__(self) -> int:
         return self.samples.shape[0]
@@ -64,7 +66,7 @@ class SegmentationDataset(Dataset):
 
         image_name, mask_name = self.samples.loc[idx, 'img'] , self.samples.loc[idx, 'mask']
         image = rasterio.open(os.path.join(self.img_dir, image_name)).read()
-        image =np.transpose(image, (1, 2, 0))
+        image = np.transpose(image, (1, 2, 0))
         if self.mask_dir :
             mask = np.load(os.path.join(self.mask_dir, mask_name))
         else : # for test data
