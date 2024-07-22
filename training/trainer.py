@@ -5,9 +5,9 @@ from pytorch_lightning import Trainer
 from pytorch_lightning.loggers import WandbLogger, CSVLogger
 import os
 from training.callbacks import early_stop_callback, checkpoint_callback, rich_progress_bar, rich_model_summary
-from processing.utils import read_yaml_file
+from processing.utils import read_yaml_file, logger
 import wandb 
-
+from processing.plot_masks import plot_masks
 data_module = SegmentationDataModule(loader_config_path='configs/trainer.yaml')
 
 
@@ -60,8 +60,13 @@ trainer.predict(dataloaders=data_module.val_dataloader())
 
 #_____________________________________________________________________________________________________________
 
-# log hyperparameters
-wandb_logger.log_hyperparams(training_config)
+try:
+    # log hyperparameters
+    wandb_logger.log_hyperparams(training_config)
 
-# log images
-log_images(wandb_logger)
+    # log images
+    log_images(wandb_logger)
+except Exception as e:
+    logger.error(f"Error logging to wandb: {e}")
+    logger.info("Logging to wandb failed. Plotting masks locally.")
+    plot_masks(train_dir=training_config['mask_dir'], predicted_dir='results/output_masks', ct=training_config['plot_masks'])
