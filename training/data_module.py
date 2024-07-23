@@ -14,7 +14,7 @@ class SegmentationDataModule(L.LightningDataModule):
         if stage == "fit":
             self.train_set = SegmentationDataset(samples=df_tr, mask_dir=self.loader_config['mask_dir'],
                                                  img_dir=self.loader_config['img_dir'],
-                                                config_path= 'configs/processing.yaml', apply_transform=False, in_train_mode=True)
+                                                config_path= 'configs/processing.yaml', apply_transform=True, in_train_mode=True)
 
             self.val_set = SegmentationDataset(samples=df_tr, mask_dir=self.loader_config['mask_dir'],
                                                 img_dir=self.loader_config['img_dir'],

@@ -1,17 +1,17 @@
 from training.data_module import SegmentationDataModule
-from training.modelling.models import UNet_Variants
+from training.modelling.models import SegmentationModels
 from training.train_loop import FieldInstanceSegment
 from pytorch_lightning import Trainer
 from pytorch_lightning.loggers import WandbLogger, CSVLogger
 import os
 from training.callbacks import early_stop_callback, checkpoint_callback, rich_progress_bar, rich_model_summary
 from processing.utils import read_yaml_file, logger
-import wandb 
+import wandb
 from processing.plot_masks import plot_masks
 data_module = SegmentationDataModule(loader_config_path='configs/trainer.yaml')
 
 
-model = UNet_Variants(config_path='configs/unet_family.yaml')
+model = SegmentationModels(config_path='configs/unet_family.yaml')
 model.get_model()
 
 segmentation_setup = FieldInstanceSegment(config_path='configs/trainer.yaml', model=model)
@@ -30,14 +30,14 @@ def log_images(logger:WandbLogger):
     train_cols = ["caption", "sentinal-2_image", "ground_mask", "predicted_mask"]
     test_cols = ["caption", "sentinal-2_image", "predicted_mask"]
     train_data, test_data = [] , []
-    
+
     for i in range(50):
-        
-        train_data.append([f"train_{i}.tif", wandb.Image(data_or_path = f"{training_config['img_dir']}/train_{i}.tif"), 
-                           wandb.Image(data_or_path = f"{training_config['mask_dir']}/train_mask{i}.npy"), 
+
+        train_data.append([f"train_{i}.tif", wandb.Image(data_or_path = f"{training_config['img_dir']}/train_{i}.tif"),
+                           wandb.Image(data_or_path = f"{training_config['mask_dir']}/train_mask{i}.npy"),
                            wandb.Image(data_or_path = f"results/output_masks/train_mask{i}.npy")])
-        
-        test_data.append([f"test_{i}.tif", wandb.Image(data_or_path = f"{training_config['img_dir']}/test_{i}.tif"), 
+
+        test_data.append([f"test_{i}.tif", wandb.Image(data_or_path = f"{training_config['img_dir']}/test_{i}.tif"),
                           wandb.Image(data_or_path = f"results/output_masks/test_mask{i}.npy")])
 
     logger.log_table(key="Training Samples", columns=train_cols, data=train_data)
@@ -55,7 +55,7 @@ data_module.setup(stage="test")
 trainer.test(dataloaders=data_module.test_dataloader())
 
 data_module.setup(stage="predict")
-trainer.predict(dataloaders=data_module.predict_dataloader())  
+trainer.predict(dataloaders=data_module.predict_dataloader())
 trainer.predict(dataloaders=data_module.val_dataloader())
 
 #_____________________________________________________________________________________________________________
