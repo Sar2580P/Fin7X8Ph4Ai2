@@ -10,7 +10,6 @@ from torch.utils.data import Dataset
 import rasterio
 from utils import read_yaml_file
 from torchvision.transforms import functional as F
-from PIL import Image
 
 class SegmentationDataset(Dataset):
     def __init__(
@@ -36,6 +35,14 @@ class SegmentationDataset(Dataset):
             transforms.RandomHorizontalFlip(p=0.6),
             AutoAugment(policy=AutoAugmentPolicy.IMAGENET)
         ])
+    
+      # @property
+    # def val_transforms(self):
+    #     return A.Compose([
+    #         A.LongestMaxSize(max_size=800, p=1),
+    #         A.PadIfNeeded(min_height=800, min_width=800, border_mode=A.cv2.BORDER_CONSTANT, value=0, mask_value=0, p=1),
+    #         A.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225], max_pixel_value=255.0, p=1),
+    #     ])
 
     @property
     def post_transforms(self):
@@ -55,7 +62,8 @@ class SegmentationDataset(Dataset):
     def __getitem__(self, idx: int) -> Dict[str, Any]:
         image_name, mask_name = self.samples.loc[idx, 'img'], self.samples.loc[idx, 'mask']
         image = rasterio.open(os.path.join(self.img_dir, image_name)).read()
-        image = np.transpose(image, (1, 2, 0))
+        image = np.transpose(image, (1, 2, 0)).astype(np.uint8)
+
 
         if self.mask_dir:
             mask = np.load(os.path.join(self.mask_dir, mask_name))
@@ -71,20 +79,27 @@ class SegmentationDataset(Dataset):
         mask = Image.fromarray(mask)
 
         # Apply pre-transforms to the image and mask
-        image = self.pre_transforms(image)
-        mask = self.pre_transforms(mask)
+        image = self.pre_transforms(Image.fromarray(image))
+        mask = self.pre_transforms(Image.fromarray(mask))
 
         # Apply augmentations if specified
         if self.apply_transform and self.in_train_mode:
+            # Convert image and mask to PIL for applying torchvision transformations
+            image = F.to_pil_image(image)
+            mask = F.to_pil_image(mask)
+            
             seed = np.random.randint(2147483647)
             torch.manual_seed(seed)
             image = self.train_transforms(image)
-            
+
             torch.manual_seed(seed)
             mask = self.train_transforms(mask)
+            
+            image = F.to_tensor(image)
+            mask = F.to_tensor(mask)
 
         # Apply post-transforms to the image
-        image = self.post_transforms(image)
+        # image = self.post_transforms(image)
 
         # Normalize image
         image = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])(image)

@@ -5,10 +5,10 @@ import os
 from processing.utils import read_yaml_file
 from tqdm import tqdm
 from torchmetrics.classification import Dice
-from training.modelling.models import UNet_Variants
+from training.modelling.models import SegmentationModels
 
 class FieldInstanceSegment(pl.LightningModule):
-  def __init__(self, model:UNet_Variants, config_path:str):
+  def __init__(self, model:SegmentationModels, config_path:str):
     super().__init__()
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
