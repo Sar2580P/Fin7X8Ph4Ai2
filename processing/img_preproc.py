@@ -110,20 +110,64 @@ def apply_3_channel_preprocessing():
             except ValueError as e:
                 print(f"Error processing {img_path}: {e}")
       
-      
+def get_bounding_box_XYWH_ABS(polygon_coords:List)->List:
+    # Extract x and y coordinates
+    x_coords = polygon_coords[0::2]
+    y_coords = polygon_coords[1::2]
+
+    # Compute the top-left corner (min x, min y)
+    x_min = min(x_coords)
+    y_min = min(y_coords)
+
+    # Compute the width and height
+    width = max(x_coords) - x_min
+    height = max(y_coords) - y_min
+
+    return [x_min, y_min, width, height]
+
+# write function to load train_annoation.json, extract bounding box for 
+def update_annotations(data_dir:str = 'data/original_images', json_file:str = 'data/train_annotation.json', 
+                       save_path:str='data/updated_train_annotation.json'):
+    '''
+    This function takes the default annotation file and extracts various information from the images
+    including the height, width, bounding box, and category_id. The updated information is saved to a new json file.
+    '''
+    
+    with open(json_file) as f:
+        data = json.load(f)
+    
+    category_id = {'field'  : 0} # only one category
+    for img in tqdm(data['images'], desc='Updating annotations'):
+        annotations = img['annotations']
+        with rasterio.open(f"{data_dir}/{img['file_name']}") as dataset:
+            height , width = dataset.height , dataset.width
+        img['height'], img['width'] = height, width
+        for annotation in annotations:
+            bounding_box = get_bounding_box_XYWH_ABS(annotation['segmentation'])
+            annotation['bounding_box'] = bounding_box
+            annotation['category_id'] = category_id[annotation['class']]
+            
+    # save the updated json fle
+    with open(save_path, 'w') as f:
+        json.dump(data, f)    
+
+   
       
 if __name__ == '__main__':
   
-  if not os.path.exists('data/train_df.csv'):
-      create_df()
-      create_df(is_train = False)
-      print('Dataframes created successfully')
-      
-  if not os.path.exists('data/masks'):
-      create_masks()
-      print('Masks created successfully')
-      
-  if not os.path.exists('data/3channel_images'):
-      apply_3_channel_preprocessing()
-      print('3 channel images created successfully')
-  
+    if not os.path.exists('data/train_df.csv'):
+        create_df()
+        create_df(is_train = False)
+        print('Dataframes created successfully')
+        
+    if not os.path.exists('data/masks'):
+        create_masks()
+        print('Masks created successfully')
+        
+    if not os.path.exists('data/3channel_images'):
+        apply_3_channel_preprocessing()
+        print('3 channel images created successfully')
+    
+    if not os.path.exists('data/updated_train_annotation.json'):
+        update_annotations()
+        print('Updated annotations created successfully')
