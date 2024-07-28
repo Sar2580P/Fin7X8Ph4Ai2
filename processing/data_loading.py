@@ -1,14 +1,16 @@
 from pathlib import Path
 from typing import List, Dict, Any, Tuple
-import pandas as pd, os
+import pandas as pd
+import os
 from torchvision import transforms
 from torchvision.transforms import AutoAugment, AutoAugmentPolicy
 import numpy as np
 import torch
 from torch.utils.data import Dataset
 import rasterio
-from processing.utils import read_yaml_file
+from utils import read_yaml_file
 from torchvision.transforms import functional as F
+from PIL import Image
 
 class SegmentationDataset(Dataset):
     def __init__(
@@ -34,14 +36,6 @@ class SegmentationDataset(Dataset):
             transforms.RandomHorizontalFlip(p=0.6),
             AutoAugment(policy=AutoAugmentPolicy.IMAGENET)
         ])
-    
-      # @property
-    # def val_transforms(self):
-    #     return A.Compose([
-    #         A.LongestMaxSize(max_size=800, p=1),
-    #         A.PadIfNeeded(min_height=800, min_width=800, border_mode=A.cv2.BORDER_CONSTANT, value=0, mask_value=0, p=1),
-    #         A.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225], max_pixel_value=255.0, p=1),
-    #     ])
 
     @property
     def post_transforms(self):
@@ -68,25 +62,26 @@ class SegmentationDataset(Dataset):
         else:  # for test data
             mask = np.zeros(image.shape[:-1], dtype=np.uint8)
 
+        # Convert image and mask to uint8 before converting to PIL
+        image = (image * 255).astype(np.uint8)
+        mask = (mask * 255).astype(np.uint8)
+
+        # Convert image and mask to PIL images before applying pre-transforms
+        image = Image.fromarray(image)
+        mask = Image.fromarray(mask)
+
         # Apply pre-transforms to the image and mask
         image = self.pre_transforms(image)
         mask = self.pre_transforms(mask)
 
         # Apply augmentations if specified
         if self.apply_transform and self.in_train_mode:
-            # Convert image and mask to PIL for applying torchvision transformations
-            image = F.to_pil_image(image)
-            mask = F.to_pil_image(mask)
-            
             seed = np.random.randint(2147483647)
             torch.manual_seed(seed)
             image = self.train_transforms(image)
             
             torch.manual_seed(seed)
             mask = self.train_transforms(mask)
-            
-            image = F.to_tensor(image)
-            mask = F.to_tensor(mask)
 
         # Apply post-transforms to the image
         image = self.post_transforms(image)
@@ -103,6 +98,19 @@ class SegmentationDataset(Dataset):
             "image_name": image_name.split('.')[0]
         }
 
+if __name__ == "__main__":
+    # Define the paths and parameters
+    img_dir = r"data/3channel_images"
+    mask_dir = r"data/masks"
+    config_path = r"configs/processing.yaml"
 
+    # Load the samples dataframe
+    samples = pd.read_csv(r"data/train_df.csv")
 
+    # Create an instance of the SegmentationDataset
+    dataset = SegmentationDataset(samples, img_dir, config_path, mask_dir)
 
+    # Iterate over the dataset and print the results
+    for idx in range(len(dataset)):
+        data = dataset[idx]
+        print(data)
