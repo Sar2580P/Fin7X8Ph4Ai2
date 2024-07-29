@@ -8,16 +8,17 @@ from tqdm import tqdm
 def extract_boundaries(mask_path: str) -> List[List[int]]:
     # Load the binary mask
     binary_image = np.load(mask_path)
-    
+    # Convert the binary image to the correct type
+    binary_image = binary_image.astype(np.uint8)
     # Find contours in the binary image
     contours, _ = cv2.findContours(binary_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    
+
     # Extract boundary coordinates
     boundaries = []
     for contour in contours:
         boundary = contour.squeeze().flatten().tolist()
         boundaries.append(boundary)
-    
+
     return boundaries
 
 
@@ -37,18 +38,18 @@ def create_submission_json(test_mask_dir:str = 'results/output_masks'):
                 'segmentation': boundary
             })
         submission.append(res)
-    
+
     with open('submission/submission.json', 'w') as f:
         json.dump( {'images' :submission}, f)
     return
 
 from submission.pq_score_calculate import get_score_for_all_images
 from processing.utils import logger
-import pickle 
+import pickle
 if __name__ == '__main__':
-    # create_submission_json()
+    create_submission_json()
     print('Submission JSON created successfully!')
-    
+
     ground_truth = json.load(open('data/train_annotation.json'))
     prediction = json.load(open('submission/submission.json'))
     scores = get_score_for_all_images(ground_truth['images'][:4], prediction['images'][:4])
