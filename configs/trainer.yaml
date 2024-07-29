@@ -1,8 +1,8 @@
 dir : 'results'
 MAX_EPOCHS : 30
-BATCH_SIZE : 16
+BATCH_SIZE : 8
 lr : !!float 1e-4
-weight_decay : !!float 1e-6
+weight_decay : !!float 1e-4
 NUM_WORKERS : 4
 img_dir : 'data/3channel_images'
 mask_dir : 'data/masks'
@@ -12,7 +12,7 @@ plot_masks : 5
 # CALLBACK related config
 callbacks:
   ModelCheckpoint:
-    monitor: 'val_loss'
+    monitor: 'train_loss'
     mode: 'min'
     save_top_k: 2
     save_last: True

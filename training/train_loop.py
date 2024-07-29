@@ -36,6 +36,8 @@ class FieldInstanceSegment(pl.LightningModule):
   def validation_step(self, batch, batch_idx):
     x, ground_mask = batch['image'], batch['mask']
     pred_mask = self.model.forward(x)
+    # print(f"pred_mask dtype: {pred_mask.dtype}, shape: {pred_mask.shape}, requires_grad: {pred_mask.requires_grad}")
+    # print(f"ground_mask dtype: {ground_mask.dtype}, shape: {ground_mask.shape}, requires_grad: {ground_mask.requires_grad}")
     loss = 1- self.criterion(pred_mask, ground_mask)
     self.log("val_loss", loss, on_epoch=True, prog_bar=True, logger=True)
     return loss
@@ -43,8 +45,8 @@ class FieldInstanceSegment(pl.LightningModule):
   def test_step(self, batch, batch_idx):
     x, ground_mask = batch['image'], batch['mask']
     pred_mask = self.model.forward(x)
-    print(f"pred_mask dtype: {pred_mask.dtype}, shape: {pred_mask.shape}, requires_grad: {pred_mask.requires_grad}")
-    print(f"ground_mask dtype: {ground_mask.dtype}, shape: {ground_mask.shape}, requires_grad: {ground_mask.requires_grad}")
+    # print(f"pred_mask dtype: {pred_mask.dtype}, shape: {pred_mask.shape}, requires_grad: {pred_mask.requires_grad}")
+    # print(f"ground_mask dtype: {ground_mask.dtype}, shape: {ground_mask.shape}, requires_grad: {ground_mask.requires_grad}")
     loss = 1- self.criterion(pred_mask, ground_mask)
     self.log("test_loss", loss, on_epoch=True, prog_bar=True, logger=True)
     return loss

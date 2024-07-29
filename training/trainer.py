@@ -8,6 +8,9 @@ from training.callbacks import early_stop_callback, checkpoint_callback, rich_pr
 from processing.utils import read_yaml_file, logger
 import wandb
 from processing.plot_masks import plot_masks
+import torch
+
+torch.set_float32_matmul_precision('medium')  #  | 'high'
 data_module = SegmentationDataModule(loader_config_path='configs/trainer.yaml')
 
 
@@ -62,7 +65,7 @@ trainer.predict(dataloaders=data_module.val_dataloader())
 
 try:
     # log hyperparameters
-    wandb_logger.log_hyperparams(training_config)
+    # wandb_logger.log_hyperparams(training_config)
 
     # log images
     log_images(wandb_logger)

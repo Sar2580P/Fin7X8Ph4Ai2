@@ -8,10 +8,32 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset
 import rasterio
-from utils import read_yaml_file
+from processing.utils import read_yaml_file
 from torchvision.transforms import functional as F
 from PIL import Image
 
+import numpy as np
+
+def check_nan_inf(image):
+    contains_nan = np.isnan(image).any()
+    contains_pos_inf = np.isposinf(image).any()
+    contains_neg_inf = np.isneginf(image).any()
+    contains_inf = np.isinf(image).any()  # For both +inf and -inf
+
+    if contains_nan:
+        print("Image contains NaN values.")
+    if contains_pos_inf:
+        print("Image contains positive infinity values.")
+    if contains_neg_inf:
+        print("Image contains negative infinity values.")
+    if contains_inf:
+        print("Image contains infinity values (either positive or negative).")
+
+    # if not (contains_nan or contains_inf):
+    #     print("Image does not contain NaN or infinity values.")
+
+# Example usage
+# Assuming `image` is your NumPy array representing the image
 class SegmentationDataset(Dataset):
     def __init__(
         self,
@@ -34,6 +56,7 @@ class SegmentationDataset(Dataset):
         return transforms.Compose([
             transforms.RandomRotation(degrees=10),
             transforms.RandomHorizontalFlip(p=0.6),
+            transforms.RandomVerticalFlip(p=0.6),
             AutoAugment(policy=AutoAugmentPolicy.IMAGENET)
         ])
 
@@ -63,6 +86,12 @@ class SegmentationDataset(Dataset):
             mask = np.zeros(image.shape[:-1], dtype=np.uint8)
 
         # Convert image and mask to uint8 before converting to PIL
+        # check_nan_inf(image)
+        image = np.nan_to_num(image, nan=0.0, posinf=1.0, neginf=0.0)
+        # Clamp values to the range [0, 1]
+        image = np.clip(image, 0, 1)
+        mask = np.clip(mask, 0, 1)
+        check_nan_inf(image)
         image = (image * 255).astype(np.uint8)
         mask = (mask * 255).astype(np.uint8)
 
@@ -79,7 +108,7 @@ class SegmentationDataset(Dataset):
             seed = np.random.randint(2147483647)
             torch.manual_seed(seed)
             image = self.train_transforms(image)
-            
+
             torch.manual_seed(seed)
             mask = self.train_transforms(mask)
 
@@ -94,7 +123,7 @@ class SegmentationDataset(Dataset):
 
         return {
             "image": image.float(),
-            "mask": mask,
+            "mask": (mask > 0.2).int(),
             "image_name": image_name.split('.')[0]
         }
 
