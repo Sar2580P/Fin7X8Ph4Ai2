@@ -1,0 +1,18 @@
+// {
+//     "python.autoComplete.extraPaths": [
+//         "/home/sarvagya/detectron2"
+//     ],
+//     "python.analysis.extraPaths": [
+//         "/home/sarvagya/detectron2"
+//     ]
+// }
+
+
+{
+    "python.autoComplete.extraPaths": [
+        "${env:HOME}/detectron2"
+    ],
+    "python.analysis.extraPaths": [
+        "${env:HOME}/detectron2"
+    ]
+}
