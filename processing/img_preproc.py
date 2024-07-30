@@ -8,6 +8,8 @@ from geopandas.geodataframe import GeoDataFrame
 import rasterio
 from tqdm import tqdm
 import json
+from PIL import Image
+
 
 def take_3_channels(channel_indices: List[int], img_path: str, save_path: str) -> np.ndarray:   
     # Ensure exactly 3 channels are selected
@@ -73,7 +75,7 @@ def create_masks():
         geojson_data = convert_to_geojson(json_data)  # Convert to GeoJSON
         polygons = gpd.GeoDataFrame.from_features(geojson_data,  crs="EPSG:4326")
         # display(polygons)
-        with rasterio.open(f'data/original_images/train_{num}.tif') as dataset:
+        with rasterio.open(f'data/images/train_{num}.tif') as dataset:
             height , width = dataset.height , dataset.width   # taking 5th channel
         
         create_mask_polygons(height=height, width = width , polygons=polygons.loc[:, 'geometry'], save_path=f'{dir}/train_mask{num}')
@@ -93,7 +95,7 @@ def create_df(dir:str ='data' , is_train :bool = True):
 
 
 def apply_3_channel_preprocessing():
-    source_dir = 'data/original_images'
+    source_dir = 'data/images'
     output_dir = 'data/3channel_images'
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
@@ -126,8 +128,8 @@ def get_bounding_box_XYWH_ABS(polygon_coords:List)->List:
     return [x_min, y_min, width, height]
 
 # write function to load train_annoation.json, extract bounding box for 
-def update_annotations(data_dir:str = 'data/original_images', json_file:str = 'data/train_annotation.json', 
-                       save_path:str='data/updated_train_annotation.json'):
+def update_annotations(data_dir:str = 'data/images', json_file:str = 'data/train_annotations.json', 
+                       save_path:str='data/updated_train_annotations.json'):
     '''
     This function takes the default annotation file and extracts various information from the images
     including the height, width, bounding box, and category_id. The updated information is saved to a new json file.
@@ -171,3 +173,8 @@ if __name__ == '__main__':
     if not os.path.exists('data/updated_train_annotation.json'):
         update_annotations()
         print('Updated annotations created successfully')
+
+
+
+
+    

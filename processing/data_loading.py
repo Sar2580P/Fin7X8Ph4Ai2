@@ -8,11 +8,12 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset
 import rasterio
-from processing.utils import read_yaml_file
+from utils import read_yaml_file
 from torchvision.transforms import functional as F
+import matplotlib.pyplot as plt
 from PIL import Image
-
-import numpy as np
+import matplotlib.colors as mcolors
+import random
 
 def check_nan_inf(image):
     contains_nan = np.isnan(image).any()
@@ -29,11 +30,6 @@ def check_nan_inf(image):
     if contains_inf:
         print("Image contains infinity values (either positive or negative).")
 
-    # if not (contains_nan or contains_inf):
-    #     print("Image does not contain NaN or infinity values.")
-
-# Example usage
-# Assuming `image` is your NumPy array representing the image
 class SegmentationDataset(Dataset):
     def __init__(
         self,
@@ -51,12 +47,17 @@ class SegmentationDataset(Dataset):
         self.img_dir = img_dir
         self.config = read_yaml_file(config_path)
 
+
+
     @property
     def train_transforms(self):
         return transforms.Compose([
             transforms.RandomRotation(degrees=10),
             transforms.RandomHorizontalFlip(p=0.6),
             transforms.RandomVerticalFlip(p=0.6),
+            transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2),
+            transforms.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5)),
+            transforms.RandomAffine(degrees=15, translate=(0.1, 0.1), scale=(0.9, 1.1)),
             AutoAugment(policy=AutoAugmentPolicy.IMAGENET)
         ])
 
@@ -86,9 +87,7 @@ class SegmentationDataset(Dataset):
             mask = np.zeros(image.shape[:-1], dtype=np.uint8)
 
         # Convert image and mask to uint8 before converting to PIL
-        # check_nan_inf(image)
         image = np.nan_to_num(image, nan=0.0, posinf=1.0, neginf=0.0)
-        # Clamp values to the range [0, 1]
         image = np.clip(image, 0, 1)
         mask = np.clip(mask, 0, 1)
         check_nan_inf(image)
@@ -103,21 +102,13 @@ class SegmentationDataset(Dataset):
         image = self.pre_transforms(image)
         mask = self.pre_transforms(mask)
 
-        # Apply augmentations if specified
-        if self.apply_transform and self.in_train_mode:
-            seed = np.random.randint(2147483647)
-            torch.manual_seed(seed)
-            image = self.train_transforms(image)
+        # Apply selection-based augmentation if specified
 
-            torch.manual_seed(seed)
-            mask = self.train_transforms(mask)
 
         # Apply post-transforms to the image
         image = self.post_transforms(image)
 
-        # Normalize image
-        image = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])(image)
-
+    
         # Convert mask to tensor separately
         mask = torch.from_numpy(np.array(mask)).long()
 
@@ -127,11 +118,33 @@ class SegmentationDataset(Dataset):
             "image_name": image_name.split('.')[0]
         }
 
+def visualize_sample(dataset: SegmentationDataset, idx: int):
+    sample = dataset[idx]
+    image = sample["image"].permute(1, 2, 0).numpy()  # Convert CHW to HWC for plotting
+    mask = sample["mask"].numpy()
+
+    # Define a colormap for the mask
+    cmap = mcolors.ListedColormap(['black', 'red'])  # Define colors: background (black), mask (red)
+    bounds = [0, 0.5, 1]
+    norm = mcolors.BoundaryNorm(bounds, cmap.N)
+
+    fig, axes = plt.subplots(1, 2, figsize=(12, 6))
+    axes[0].imshow(image)
+    axes[0].set_title("Image")
+    axes[0].axis("off")
+
+    axes[1].imshow(mask, cmap=cmap, norm=norm)
+    axes[1].set_title("Mask")
+    axes[1].axis("off")
+
+    plt.show()
+
 if __name__ == "__main__":
     # Define the paths and parameters
     img_dir = r"data/3channel_images"
     mask_dir = r"data/masks"
     config_path = r"configs/processing.yaml"
+    save_dir = r"pics"
 
     # Load the samples dataframe
     samples = pd.read_csv(r"data/train_df.csv")
@@ -139,7 +152,5 @@ if __name__ == "__main__":
     # Create an instance of the SegmentationDataset
     dataset = SegmentationDataset(samples, img_dir, config_path, mask_dir)
 
-    # Iterate over the dataset and print the results
-    for idx in range(len(dataset)):
-        data = dataset[idx]
-        print(data)
+    # Visualize a sample
+    visualize_sample(dataset, idx=0)
