@@ -7,6 +7,7 @@ import cv2, os
 from geopandas.geodataframe import GeoDataFrame
 import rasterio
 from tqdm import tqdm
+from tifffile import imread, imwrite
 import json
 from PIL import Image
 
@@ -153,15 +154,59 @@ def update_annotations(data_dir:str = 'data/images', json_file:str = 'data/train
     with open(save_path, 'w') as f:
         json.dump(data, f)    
 
-   
-      
+def patchify_image(image, patch_size):
+    patches = []
+    h, w = image.shape[:2]
+    for i in range(0, h, patch_size):
+        for j in range(0, w, patch_size):
+            patch = image[i:min(i+patch_size, h), j:min(j+patch_size, w)]
+            if patch.shape[0] == patch_size and patch.shape[1] == patch_size:
+                patches.append(patch)
+    return patches
+
+def patchify_mask(mask, patch_size):
+    patches = []
+    h, w = mask.shape[:2]
+    for i in range(0, h, patch_size):
+        for j in range(0, w, patch_size):
+            patch = mask[i:min(i+patch_size, h), j:min(j+patch_size, w)]
+            if patch.shape[0] == patch_size and patch.shape[1] == patch_size:
+                patches.append(patch)
+    return patches
+
+def save_patches(patches, save_dir, prefix):
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+    for idx, patch in enumerate(patches):
+        save_path = os.path.join(save_dir, f"{prefix}_patch_{idx}.tif")
+        imwrite(save_path, patch)  
+
+def patchify_images_and_masks(image_dir, mask_dir, patch_size, patched_image_dir, patched_mask_dir):
+    if not os.path.exists(patched_image_dir):
+        os.makedirs(patched_image_dir)
+    if not os.path.exists(patched_mask_dir):
+        os.makedirs(patched_mask_dir)
+
+    image_files = [f for f in os.listdir(image_dir) if f.endswith('.tif')]
+    mask_files = [f for f in os.listdir(mask_dir) if f.endswith('.npy')]
+
+    for image_file, mask_file in tqdm(zip(image_files, mask_files), total=len(image_files), desc="Patchifying images and masks"):
+        image_path = os.path.join(image_dir, image_file)
+        mask_path = os.path.join(mask_dir, mask_file)
+
+        image = imread(image_path)
+        mask = np.load(mask_path)
+
+        image_patches = patchify_image(image, patch_size)
+        mask_patches = patchify_mask(mask, patch_size)
+
+        save_patches(image_patches, patched_image_dir, image_file.split('.')[0])
+        save_patches(mask_patches, patched_mask_dir, mask_file.split('.')[0])
+
 if __name__ == '__main__':
-  
-    if not os.path.exists('data/train_df.csv'):
-        create_df()
-        create_df(is_train = False)
-        print('Dataframes created successfully')
-        
+    create_df(is_train=False)
+    print('Dataframes created successfully')
+    
     if not os.path.exists('data/masks'):
         create_masks()
         print('Masks created successfully')
@@ -174,7 +219,12 @@ if __name__ == '__main__':
         update_annotations()
         print('Updated annotations created successfully')
 
+    # Patchify images and masks
+    image_dir = 'data/3channel_images'
+    mask_dir = 'data/masks'
+    patched_image_dir = 'data/patched_images'
+    patched_mask_dir = 'data/patched_masks'
+    patch_size = 256
 
-
-
-    
+    patchify_images_and_masks(image_dir, mask_dir, patch_size, patched_image_dir, patched_mask_dir)
+    print('Patchifying completed successfully')
