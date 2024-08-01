@@ -42,3 +42,29 @@ Tasks--->
 - Check if image logging properly in wandb
 - Other models (except mask-rcnn) run for the data, 
 - create report
+
+
+New tasks --->
+- see how to read tif format image using utils of detectron2
+       - It only supports 3 formats, opens in PIL format, then sends in numpy format
+       - Create custom reader
+
+- Override __call__ of DataMapper for image-reading   ---> done
+    - https://detectron2.readthedocs.io/en/latest/_modules/detectron2/data/dataset_mapper.html#DatasetMapper
+
+- See how to use custom designed FPN like DAFPN (look for model registry)   --> done
+- Apply modified header to accept images with varying channels
+- add hooks for visualization 
+- DefaultTrainer
+   - update train/test_loader   ----> done
+   - update optimizer function to support other optimizers (currently support SGD only)     ---> later
+   - Override build-hooks function to be abletoaccept hooks as parameters      ---> done
+
+    - See how to do testing and evalutaion ---> done
+
+
+New Tasks --->
+- fill MetadataCatalog completely with evaluator_type ---> done
+- Predictor implementation for generating mask for test dataset  ----> done
+
+Connect all things, cfg ,model , loaders , everything

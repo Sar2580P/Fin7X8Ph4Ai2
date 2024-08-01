@@ -1,7 +1,6 @@
-model_name : 'UnetPlusPlus'
 
 UnetPlusPlus_config :
-  encoder_name: "resnet34"
+  encoder_name: "resnet50"
   encoder_depth: 5
   encoder_weights: "imagenet"
   decoder_use_batchnorm: True
@@ -24,10 +23,10 @@ FPN_config :
   encoder_depth: 5
   encoder_weights: 'imagenet'
   decoder_pyramid_channels: 256
-  decoder_segmentation_channels: 128 
+  decoder_segmentation_channels: 128
   decoder_merge_policy: 'add'
   decoder_dropout: 0.2
-  in_channels: 3 
+  in_channels: 3
   classes: 1
   # activation: None
   upsampling: 4
@@ -44,3 +43,7 @@ DeepLabV3_config :
     # activation: Optional[str] = None,
     upsampling:  8
     # aux_params: Optional[dict] = None,
+
+
+
+model_name : 'UnetPlusPlus'  # 'Unet' , 'UnetPlusPlus' , 'FPN' , 'DeepLabV3'

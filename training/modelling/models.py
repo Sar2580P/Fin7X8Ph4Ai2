@@ -13,11 +13,11 @@ class SegmentationModels(BaseModel):
     name : str = None
     model_naam:str = None
     config: Dict[str, Any] = None
-    
+
     class Config:
         arbitrary_types_allowed = True
         protected_namespaces = ()
-        
+
     def get_model(self):
         self.config = read_yaml_file(self.config_path)
         self.model_naam = self.config['model_name']
@@ -26,14 +26,14 @@ class SegmentationModels(BaseModel):
         if self.model_naam == 'UnetPlusPlus':
             self.name = f"{self.model_naam}__E-{self.config['encoder_name']}__W-{self.config['encoder_weights']}__C-{self.config['in_channels']}"
             self.model = smp.UnetPlusPlus(**self.config)
-            
+
         elif self.model_naam == 'Unet':
             self.name = f"{self.model_naam}__E-{self.config['encoder_name']}__W-{self.config['encoder_weights']}__C-{self.config['in_channels']}"
             self.model = smp.Unet(**self.config)
-                    
+
         elif self.model_naam == 'FPN':
             self.name = f"{self.model_naam}__E-{self.config['encoder_name']}__W-{self.config['encoder_weights']}__C-{self.config['in_channels']}"
-            
+
             self.model = smp.FPN(
                         encoder_name=self.config['encoder_name'],        # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
                         encoder_weights=self.config['encoder_weights'],     # use `imagenet` pre-trained weights for encoder initialization
@@ -42,15 +42,17 @@ class SegmentationModels(BaseModel):
                     )
         elif self.model_naam == 'FPN':
             self.name = f"{self.model_naam}__E-{self.config['encoder_name']}__W-{self.config['encoder_weights']}__C-{self.config['in_channels']}"
-            
+
             self.model = smp.FPN(**self.config)
         elif self.model_naam == 'DeepLabv3':
             self.name = f"{self.model_naam}__E-{self.config['encoder_name']}__W-{self.config['encoder_weights']}__C-{self.config['in_channels']}"
-            
+
             self.model = smp.DeepLabV3(**self.config)
-        
+
+        # print(self.model)
+
         self.preproc_func = get_preprocessing_fn(self.config['encoder_name'], self.config['encoder_weights'])
-        
+
     config = ConfigDict(arbitrary_types_allowed=True)
 
     def forward(self, x)->torch.Tensor :
@@ -62,7 +64,7 @@ class SegmentationModels(BaseModel):
         x = torch.sigmoid(x)  # Ensure it's between 0 and 1
         x = x.squeeze(1)
         return x
-    
+
 
 if __name__ == '__main__':
     unet = SegmentationModels(config_path='configs/unet_family.yaml')
