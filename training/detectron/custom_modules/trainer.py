@@ -129,8 +129,8 @@ class ExtendedPredictor(DefaultPredictor):
 
 
 class CustomTrainer(DefaultTrainer):
-    
-    def __init__(self, cfg:CfgNode, train_mapper:DatasetMapper=None, 
+
+    def __init__(self, cfg:CfgNode, train_mapper:DatasetMapper=None,
                  test_mapper:DatasetMapper=None):
         """
         Args:
@@ -138,7 +138,7 @@ class CustomTrainer(DefaultTrainer):
             train_mapper (callable, optional): a function/method to map training dataset items.
             test_mapper (callable, optional): a function/method to map test dataset items.
         """
-        super().__init__()
+        super().__init__(cfg)
         logger = logging.getLogger("detectron2")
         if not logger.isEnabledFor(logging.INFO):  # setup_logger is not called for d2
             setup_logger()
@@ -166,6 +166,8 @@ class CustomTrainer(DefaultTrainer):
 
         self.hooks = self.build_hooks()           # Initialize hooks list
 
+        print(self.hooks , ')'*50)
+
     def add_hook(self, hook):
         """
         Args:
@@ -178,7 +180,7 @@ class CustomTrainer(DefaultTrainer):
         Register all hooks. This method should be called after adding custom hooks.
         """
         self.register_hooks(self.hooks)
-        
+
     @classmethod
     def build_train_loader(cls, cfg, mapper:DatasetMapper=None):
         """
@@ -200,8 +202,8 @@ class CustomTrainer(DefaultTrainer):
         Overwrite it if you'd like a different data loader.
         """
         return build_detection_test_loader(cfg, dataset_name, mapper=mapper)
-    
-    
+
+
     @classmethod
     def build_evaluator(cls, cfg, dataset_name, output_folder=None):
         return build_evaluator(cfg, dataset_name, output_folder)

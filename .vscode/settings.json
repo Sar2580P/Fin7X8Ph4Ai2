@@ -10,9 +10,9 @@
 
 {
     "python.autoComplete.extraPaths": [
-        "${env:HOME}/detectron2"
+        "/home/bala/Desktop/sri_krishna/detectron2"
     ],
     "python.analysis.extraPaths": [
-        "${env:HOME}/detectron2"
+        "/home/bala/Desktop/sri_krishna/detectron2"
     ]
 }

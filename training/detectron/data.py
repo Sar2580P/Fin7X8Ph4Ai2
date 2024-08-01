@@ -1,14 +1,14 @@
 from detectron2.structures import BoxMode
 from detectron2.data import DatasetCatalog, MetadataCatalog
-import json 
-import tqdm as tqdm
+import json
+from tqdm import tqdm
 from typing import List, Dict
 from processing.utils import logger
 
-def create_lightdata_for_instance_seg(data_dir:str , json_file:str = 'data/updated_train_annotation.json')->List[Dict]:
+def create_lightdata_for_instance_seg(data_dir:str , json_file:str = 'data/updated_train_annotations.json')->List[Dict]:
     with open(json_file) as f:
         data = json.load(f)
-        
+
     dataset_dicts = []
     for id , img in tqdm(enumerate(data['images']) , desc = 'Detectron2 light_data for instance segmentation'):
         record = {}
@@ -25,26 +25,31 @@ def create_lightdata_for_instance_seg(data_dir:str , json_file:str = 'data/updat
             annotation_dict['segmentation'] = annotation['segmentation']
             record['annotations'].append(annotation_dict)
         dataset_dicts.append(record)
-        
-        
+
+        return dataset_dicts
+
+
 def register_lightdata(data_config:Dict):
-    
+
     task = data_config['task']
-    for d , data_dir , annot_path in zip(["train", "val"] ,[data_config['train_data_dir'] , data_config['val_data_dir']], 
+    for d , data_dir , annot_path in zip(["train", "val"] ,[data_config['train_data_dir'] , data_config['val_data_dir']],
                                          [data_config['train_annot_path'], data_config['val_annot_path']]):
-        
-        DatasetCatalog.register(f"{task}_{d}", lambda d=d: create_lightdata_for_instance_seg(data_dir , annot_path))
-        MetadataCatalog.get(task).thing_classes = data_config['categories']
-        MetadataCatalog.get(task).thing_colors = data_config['category_colors']  # RGB colors for each class
-        MetadataCatalog.get(task).evaluator_type = data_config['evaluator_type']
-    
-    logger.info(MetadataCatalog)
-    
-    
-    
+
+        DatasetCatalog.register(
+            f"{task}_{d}",
+            lambda data_dir=data_dir, annot_path=annot_path: create_lightdata_for_instance_seg(data_dir, annot_path)
+        )
+    MetadataCatalog.get(task).thing_classes = data_config['categories']
+    MetadataCatalog.get(task).thing_colors = data_config['thing_colors']  # RGB colors for each class
+    MetadataCatalog.get(task).evaluator_type = data_config['evaluator_type']
+
+    # logger.info(DatasetCatalog.get('field_instance_segmentation_train'))
 
 
-    
+
+
+
+
 # # Mapper
 # def mapper(dataset_dict):
 #     dataset_dict = copy.deepcopy(dataset_dict)  # as it will be modified by code below
@@ -55,7 +60,7 @@ def register_lightdata(data_config:Dict):
 #                     T.RandomBrightness(0.9, 1.1),
 #                     T.RandomFlip(prob=0.5),
 #                     T.RandomCrop("absolute", (640, 640))
-#                     ]) 
+#                     ])
 #     auginput = T.AugInput(image)
 #     transform = augs(auginput)
 #     image = torch.from_numpy(auginput.image.transpose(2, 0, 1))
@@ -68,8 +73,8 @@ def register_lightdata(data_config:Dict):
 #        "image": image,
 #        "instances": utils.annotations_to_instances(annos, image.shape[1:])
 #     }
-    
-    
+
+
 # Data loader
 
 # Augmentation
