@@ -93,6 +93,7 @@ class SegmentationDataset(Dataset):
         else:  # for test data
             mask = np.zeros(image.shape[:-1], dtype=np.uint8)
 
+        logger.info(f"min: {np.min(image)}, max: {np.max(image)}")
         # normalise image
         image = (image - np.min(image)) / (np.max(image) - np.min(image)) 
         
@@ -100,7 +101,7 @@ class SegmentationDataset(Dataset):
         if(check_nan_inf(image)):
             logger.critical(f"Image {image_name} contains NaN or Inf values")
             
-        # image = np.nan_to_num(image, nan=0.0, posinf=1.0, neginf=0.0)
+        image = np.nan_to_num(image, nan=1, posinf=1.0, neginf=0.0)
         # image = np.clip(image, 0, 1)
         # mask = np.clip(mask, 0, 1
         image = (image*255 ).astype(np.uint8)
@@ -148,11 +149,11 @@ if __name__ == "__main__":
     # Create an instance of the SegmentationDataset
     dataset = SegmentationDataset(samples, img_dir, config_path, mask_dir)
 
-    idx = np.random.randint(0, 50)
+    idx = 38 #np.random.randint(0, 50)
     
     augmented_sample = dataset.__getitem__(idx)
     original_sample = {
-        'image' : rasterio.open(os.path.join(img_dir, samples.iloc[idx , 0])).read()[2], 
+        'image' : rasterio.open(os.path.join(img_dir, samples.iloc[idx , 0])).read()[1], 
         'mask' : np.load(os.path.join(mask_dir, samples.iloc[idx , 1]))
     }
     print(original_sample['image'].shape)
