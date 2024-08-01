@@ -1,9 +1,10 @@
 dir : 'results'
-MAX_EPOCHS : 30
-BATCH_SIZE : 8
-lr : !!float 1e-4
-weight_decay : !!float 1e-4
-NUM_WORKERS : 4
+MAX_EPOCHS : 20
+BATCH_SIZE : 16
+lr : !!float 1e-3
+weight_decay : !!float 1e-5
+log_every_n_steps : 8   # should be less than the number of steps in an epoch, i.e. BATCH_SIZE
+NUM_WORKERS : 95
 img_dir : 'data/3channel_images'
 mask_dir : 'data/masks'
 ckpt_file_name : 'Epoch-{epoch}__Loss-{val_loss:.2f}'

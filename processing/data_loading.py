@@ -18,9 +18,9 @@ import random
 def check_nan_inf(image:np.ndarray)->bool:
     contains_nan = np.isnan(image).any()
     contains_inf = np.isinf(image).any()  # For both +inf and -inf
-    
+
     return contains_nan or contains_inf
-    
+
 class TransformBoth:
     def __init__(self, base_transform):
         self.base_transform = base_transform
@@ -38,7 +38,7 @@ class PairCompose(transforms.Compose):
         for t in self.transforms:
             image, mask = t(image, mask)
         return image, mask
-    
+
 class SegmentationDataset(Dataset):
     def __init__(
         self,
@@ -77,7 +77,8 @@ class SegmentationDataset(Dataset):
     @property
     def pre_transforms(self):
         return transforms.Compose([
-            transforms.Resize((self.config['img_height'], self.config['img_width']))
+            # transforms.Resize((self.config['img_height'], self.config['img_width']))
+            transforms.CenterCrop((self.config['img_height'], self.config['img_width']))
         ])
 
     def __len__(self) -> int:
@@ -94,17 +95,17 @@ class SegmentationDataset(Dataset):
             mask = np.zeros(image.shape[:-1], dtype=np.uint8)
 
         # normalise image
-        image = (image - np.min(image)) / (np.max(image) - np.min(image)) 
-        
+        image = (image - np.min(image)) / (np.max(image) - np.min(image))
+
         # Convert image and mask to uint8 before converting to PIL)
         if(check_nan_inf(image)):
             logger.critical(f"Image {image_name} contains NaN or Inf values")
-            
+
         # image = np.nan_to_num(image, nan=0.0, posinf=1.0, neginf=0.0)
         # image = np.clip(image, 0, 1)
         # mask = np.clip(mask, 0, 1
         image = (image*255 ).astype(np.uint8)
-        mask = (mask * 255).astype(np.uint8)        
+        mask = (mask * 255).astype(np.uint8)
 
         # Convert image and mask to PIL images before applying pre-transforms
         image = Image.fromarray(image)
@@ -122,7 +123,7 @@ class SegmentationDataset(Dataset):
         image = self.post_transforms(image)
 
         '''
-        normalising mask to range 0-1, by dividing by 255 
+        normalising mask to range 0-1, by dividing by 255
         so that loss function does not give huge loss thus leading to high gradients
         '''
         mask = (np.array(mask)/255.0)> self.config['mask_threshold']
@@ -149,29 +150,29 @@ if __name__ == "__main__":
     dataset = SegmentationDataset(samples, img_dir, config_path, mask_dir)
 
     idx = np.random.randint(0, 50)
-    
+
     augmented_sample = dataset.__getitem__(idx)
     original_sample = {
-        'image' : rasterio.open(os.path.join(img_dir, samples.iloc[idx , 0])).read()[2], 
+        'image' : rasterio.open(os.path.join(img_dir, samples.iloc[idx , 0])).read()[2],
         'mask' : np.load(os.path.join(mask_dir, samples.iloc[idx , 1]))
     }
     print(original_sample['image'].shape)
     print(augmented_sample['image'].shape)
     # plot original vs augmented
     fig, axes = plt.subplots(1, 4, figsize=(32, 6))
-    
+
     axes[0].imshow(original_sample['image'])
     axes[0].set_title("Original Image")
-    
+
     axes[1].imshow(original_sample['mask'])
     axes[1].set_title("Original Mask")
-    
+
     axes[2].imshow(augmented_sample['image'][1, :, :])
     axes[2].set_title("Augmented Image")
-    
+
     axes[3].imshow(augmented_sample['mask'].numpy())
     axes[3].set_title("Augmented Mask")
     # super title
     plt.suptitle(f"Original vs Augmented Image and Mask - {samples.iloc[idx, 0]}")
-    
+
     plt.savefig(os.path.join(save_dir, 'original_vs_augmented.png'))
