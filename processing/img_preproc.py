@@ -75,10 +75,10 @@ def create_masks():
         geojson_data = convert_to_geojson(json_data)  # Convert to GeoJSON
         polygons = gpd.GeoDataFrame.from_features(geojson_data,  crs="EPSG:4326")
         # display(polygons)
-        with rasterio.open(f'data/images/train_{num}.tif') as dataset:
+        with rasterio.open(f'data/original_images/train_{num}.tif') as dataset:
             height , width = dataset.height , dataset.width   # taking 5th channel
         
-        create_mask_polygons(height=height, width = width , polygons=polygons.loc[:, 'geometry'], save_path=f'{dir}/train_mask{num}')
+        create_mask_polygons(height=height, width = width , polygons=polygons.loc[:, 'geometry'], save_path=f'{dir}/train_{num}')
     
     return
 
@@ -88,10 +88,11 @@ def create_df(dir:str ='data' , is_train :bool = True):
     prefix = 'train' if is_train else 'test'
     for i in range(50):
         img = f'{prefix}_{i}.tif'
-        mask = f'{prefix}_mask{i}.npy' if is_train else ''
+        mask = f'{prefix}_{i}.npy' if is_train else ''
         df.loc[i] = [img, mask]
         
     df.to_csv(f'{dir}/{prefix}_df.csv', index = False)
+    
 
 
 def apply_3_channel_preprocessing():
@@ -163,21 +164,22 @@ def patchify_image(image, patch_size , offset = 50):
                 patches.append(patch)
     return patches
 
-def patchify_mask(mask, patch_size):
+def patchify_mask(mask, patch_size ,offset = 50):
     patches = []
     h, w = mask.shape[:2]
-    for i in range(0, h, patch_size):
-        for j in range(0, w, patch_size):
+    for i in range(0, h, offset):
+        for j in range(0, w, offset):
             patch = mask[i:min(i+patch_size, h), j:min(j+patch_size, w)]
             if patch.shape[0] == patch_size and patch.shape[1] == patch_size:
                 patches.append(patch)
     return patches
 
-def save_patches(patches, save_dir, prefix):
+def save_patches(patches, save_dir, prefix , is_mask = False):
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
+    format = 'npy' if is_mask else 'tif'
     for idx, patch in enumerate(patches):
-        save_path = os.path.join(save_dir, f"{prefix}_patch_{idx}.tif")
+        save_path = os.path.join(save_dir, f"{prefix}-{idx}.{format}")
         imwrite(save_path, patch)  
 
 def patchify_images_and_masks(image_dir, mask_dir, patch_size, patched_image_dir, patched_mask_dir):
@@ -188,6 +190,8 @@ def patchify_images_and_masks(image_dir, mask_dir, patch_size, patched_image_dir
 
     train_image_files = [f for f in os.listdir(image_dir) if (f.endswith('.tif') and f.startswith('train'))]
     train_mask_files = [f for f in os.listdir(mask_dir) if f.endswith('.npy')]
+    train_image_files.sort()
+    train_mask_files.sort()
 
     for image_file, mask_file in tqdm(zip(train_image_files, train_mask_files), total=len(train_image_files), desc="Patchifying images and masks"):
         image_path = os.path.join(image_dir, image_file)
@@ -195,15 +199,18 @@ def patchify_images_and_masks(image_dir, mask_dir, patch_size, patched_image_dir
 
         image = imread(image_path)
         mask = np.load(mask_path)
-
+        assert image.shape[:2] == mask.shape[:2], f"Image :{image.shape[:2]} and mask: {mask.shape[:2]} have different dimensions"
         image_patches = patchify_image(image, patch_size)
         mask_patches = patchify_mask(mask, patch_size)
+        
+        assert len(image_patches) == len(mask_patches), "Number of image patches and mask patches must be equal"
 
         save_patches(image_patches, patched_image_dir, image_file.split('.')[0])
         save_patches(mask_patches, patched_mask_dir, mask_file.split('.')[0])
 
 if __name__ == '__main__':
     if not os.path.exists('data/train_df.csv'):
+        create_df(is_train=True)
         create_df(is_train=False)
         print('Dataframes created successfully')
     
@@ -227,5 +234,6 @@ if __name__ == '__main__':
         patched_mask_dir = 'data/patched_masks'
         patch_size = 256
 
-        patchify_images_and_masks(image_dir, mask_dir, patch_size, patched_image_dir, patched_mask_dir)
+        patchify_images_and_masks(image_dir, mask_dir, patch_size, 
+                                  patched_image_dir, patched_mask_dir)
         print('Patchifying completed successfully')

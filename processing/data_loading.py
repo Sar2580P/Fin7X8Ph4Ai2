@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Dict, Any, Tuple
+from typing import List, Dict, Any, Tuple , Union
 import pandas as pd
 import os
 from torchvision import transforms
@@ -8,28 +8,37 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset
 import rasterio
-from utils import read_yaml_file
+from processing.utils import read_yaml_file , logger
 from torchvision.transforms import functional as F
 import matplotlib.pyplot as plt
 from PIL import Image
 import matplotlib.colors as mcolors
 import random
 
-def check_nan_inf(image):
+def check_nan_inf(image:np.ndarray)->bool:
     contains_nan = np.isnan(image).any()
-    contains_pos_inf = np.isposinf(image).any()
-    contains_neg_inf = np.isneginf(image).any()
     contains_inf = np.isinf(image).any()  # For both +inf and -inf
+    
+    return contains_nan or contains_inf
+    
+class TransformBoth:
+    def __init__(self, base_transform):
+        self.base_transform = base_transform
 
-    if contains_nan:
-        print("Image contains NaN values.")
-    if contains_pos_inf:
-        print("Image contains positive infinity values.")
-    if contains_neg_inf:
-        print("Image contains negative infinity values.")
-    if contains_inf:
-        print("Image contains infinity values (either positive or negative).")
+    def __call__(self, image, mask):
+        seed = random.randint(0, 2**32)
+        torch.manual_seed(seed)
+        image = self.base_transform(image)
+        torch.manual_seed(seed)
+        mask = self.base_transform(mask)
+        return image, mask
 
+class PairCompose(transforms.Compose):
+    def __call__(self, image, mask):
+        for t in self.transforms:
+            image, mask = t(image, mask)
+        return image, mask
+    
 class SegmentationDataset(Dataset):
     def __init__(
         self,
@@ -46,19 +55,17 @@ class SegmentationDataset(Dataset):
         self.mask_dir = mask_dir
         self.img_dir = img_dir
         self.config = read_yaml_file(config_path)
-
+        self.defected_images = []
 
 
     @property
     def train_transforms(self):
-        return transforms.Compose([
-            transforms.RandomRotation(degrees=10),
-            transforms.RandomHorizontalFlip(p=0.6),
-            transforms.RandomVerticalFlip(p=0.6),
-            transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2),
-            transforms.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5)),
-            transforms.RandomAffine(degrees=15, translate=(0.1, 0.1), scale=(0.9, 1.1)),
-            AutoAugment(policy=AutoAugmentPolicy.IMAGENET)
+        return PairCompose([
+        TransformBoth(transforms.RandomRotation(degrees=4)),
+        TransformBoth(transforms.RandomHorizontalFlip(p=0.5)),
+        TransformBoth(transforms.RandomVerticalFlip(p=0.4)),
+        TransformBoth(transforms.RandomAffine(degrees=2, translate=(0.01, 0.01), scale=(0.9, 1.1))),
+        TransformBoth(AutoAugment(policy=AutoAugmentPolicy.CIFAR10)),
         ])
 
     @property
@@ -70,7 +77,7 @@ class SegmentationDataset(Dataset):
     @property
     def pre_transforms(self):
         return transforms.Compose([
-            transforms.Resize((self.config['img_sz'], self.config['img_sz']))
+            transforms.Resize((self.config['img_height'], self.config['img_width']))
         ])
 
     def __len__(self) -> int:
@@ -86,13 +93,18 @@ class SegmentationDataset(Dataset):
         else:  # for test data
             mask = np.zeros(image.shape[:-1], dtype=np.uint8)
 
-        # Convert image and mask to uint8 before converting to PIL
-        image = np.nan_to_num(image, nan=0.0, posinf=1.0, neginf=0.0)
-        image = np.clip(image, 0, 1)
-        mask = np.clip(mask, 0, 1)
-        check_nan_inf(image)
-        image = (image * 255).astype(np.uint8)
-        mask = (mask * 255).astype(np.uint8)
+        # normalise image
+        image = (image - np.min(image)) / (np.max(image) - np.min(image)) 
+        
+        # Convert image and mask to uint8 before converting to PIL)
+        if(check_nan_inf(image)):
+            logger.critical(f"Image {image_name} contains NaN or Inf values")
+            
+        # image = np.nan_to_num(image, nan=0.0, posinf=1.0, neginf=0.0)
+        # image = np.clip(image, 0, 1)
+        # mask = np.clip(mask, 0, 1
+        image = (image*255 ).astype(np.uint8)
+        mask = (mask * 255).astype(np.uint8)        
 
         # Convert image and mask to PIL images before applying pre-transforms
         image = Image.fromarray(image)
@@ -103,41 +115,25 @@ class SegmentationDataset(Dataset):
         mask = self.pre_transforms(mask)
 
         # Apply selection-based augmentation if specified
-
+        if self.apply_transform and self.in_train_mode:
+            image, mask = self.train_transforms(image, mask)
 
         # Apply post-transforms to the image
         image = self.post_transforms(image)
 
-    
-        # Convert mask to tensor separately
-        mask = torch.from_numpy(np.array(mask)).long()
+        '''
+        normalising mask to range 0-1, by dividing by 255 
+        so that loss function does not give huge loss thus leading to high gradients
+        '''
+        mask = (np.array(mask)/255.0)> self.config['mask_threshold']
+        mask = torch.from_numpy(mask).to(torch.int8)
 
         return {
             "image": image.float(),
-            "mask": (mask > 0.2).int(),
+            "mask": mask,
             "image_name": image_name.split('.')[0]
         }
 
-def visualize_sample(dataset: SegmentationDataset, idx: int):
-    sample = dataset[idx]
-    image = sample["image"].permute(1, 2, 0).numpy()  # Convert CHW to HWC for plotting
-    mask = sample["mask"].numpy()
-
-    # Define a colormap for the mask
-    cmap = mcolors.ListedColormap(['black', 'red'])  # Define colors: background (black), mask (red)
-    bounds = [0, 0.5, 1]
-    norm = mcolors.BoundaryNorm(bounds, cmap.N)
-
-    fig, axes = plt.subplots(1, 2, figsize=(12, 6))
-    axes[0].imshow(image)
-    axes[0].set_title("Image")
-    axes[0].axis("off")
-
-    axes[1].imshow(mask, cmap=cmap, norm=norm)
-    axes[1].set_title("Mask")
-    axes[1].axis("off")
-
-    plt.show()
 
 if __name__ == "__main__":
     # Define the paths and parameters
@@ -152,5 +148,30 @@ if __name__ == "__main__":
     # Create an instance of the SegmentationDataset
     dataset = SegmentationDataset(samples, img_dir, config_path, mask_dir)
 
-    # Visualize a sample
-    visualize_sample(dataset, idx=0)
+    idx = np.random.randint(0, 50)
+    
+    augmented_sample = dataset.__getitem__(idx)
+    original_sample = {
+        'image' : rasterio.open(os.path.join(img_dir, samples.iloc[idx , 0])).read()[2], 
+        'mask' : np.load(os.path.join(mask_dir, samples.iloc[idx , 1]))
+    }
+    print(original_sample['image'].shape)
+    print(augmented_sample['image'].shape)
+    # plot original vs augmented
+    fig, axes = plt.subplots(1, 4, figsize=(32, 6))
+    
+    axes[0].imshow(original_sample['image'])
+    axes[0].set_title("Original Image")
+    
+    axes[1].imshow(original_sample['mask'])
+    axes[1].set_title("Original Mask")
+    
+    axes[2].imshow(augmented_sample['image'][1, :, :])
+    axes[2].set_title("Augmented Image")
+    
+    axes[3].imshow(augmented_sample['mask'].numpy())
+    axes[3].set_title("Augmented Mask")
+    # super title
+    plt.suptitle(f"Original vs Augmented Image and Mask - {samples.iloc[idx, 0]}")
+    
+    plt.savefig(os.path.join(save_dir, 'original_vs_augmented.png'))
