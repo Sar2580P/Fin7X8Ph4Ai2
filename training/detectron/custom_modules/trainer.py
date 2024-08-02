@@ -164,9 +164,9 @@ class CustomTrainer(DefaultTrainer):
         self.max_iter = cfg.SOLVER.MAX_ITER
         self.cfg = cfg
 
-        self.hooks = self.build_hooks()           # Initialize hooks list
+        self.hooks = [] #self.build_hooks()           # Initialize hooks list
 
-        print(self.hooks , ')'*50)
+        # print(self.hooks , ')'*50)
 
     def add_hook(self, hook):
         """

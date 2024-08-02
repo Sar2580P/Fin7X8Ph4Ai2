@@ -3,8 +3,9 @@ from detectron2 import model_zoo
 import os
 from processing.utils import read_yaml_file
 from training.detectron.data import register_lightdata
-from training.detectron.custom_modules.trainer import CustomTrainer
+from training.detectron.custom_modules.trainer import CustomTrainer , ExtendedPredictor
 from training.detectron.custom_modules.data import TIFF_Mapper
+from detectron2.data import  MetadataCatalog
 
 # Load the configuration file
 static_config = read_yaml_file('training/detectron/config.yaml')
@@ -34,13 +35,45 @@ register_lightdata(data_model_config)
 
 cfg = initialize_config()
 
-print(cfg)
-train_mapper = TIFF_Mapper(**TIFF_Mapper.from_config(cfg, is_train=True))
-val_mapper = TIFF_Mapper(**TIFF_Mapper.from_config(cfg, is_train=False))
-trainer = CustomTrainer(cfg , train_mapper=train_mapper, test_mapper=val_mapper)
-trainer.register_all_hooks()
-print(trainer.hooks , '(())'*50)
-trainer.resume_or_load(resume=False)
-trainer.train()
-# trainer.test()
+
+DO_TRAINING = True
+
+if DO_TRAINING:
+    train_mapper = TIFF_Mapper(**TIFF_Mapper.from_config(cfg, is_train=True))
+    val_mapper = TIFF_Mapper(**TIFF_Mapper.from_config(cfg, is_train=False))
+    trainer = CustomTrainer(cfg , train_mapper=train_mapper, test_mapper=val_mapper)
+    trainer.register_all_hooks()
+    trainer.resume_or_load(resume=False)
+    trainer.train()
+
+else:
+    cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")  # path to the model we just trained
+    cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.7   # set a custom testing threshold
+    predictor = ExtendedPredictor(cfg)
+
+    from detectron2.utils.visualizer import ColorMode
+    import rasterio , numpy as np
+    import matplotlib.pyplot as plt
+    from detectron2.utils.visualizer import Visualizer
+
+    if not os.path.exists(f'{cfg.OUTPUT_DIR}/predictions'):
+        print('Creating predictions directory')
+        os.makedirs(f'{cfg.OUTPUT_DIR}/predictions')
+
+    print(os.listdir(f'{cfg.OUTPUT_DIR}/predictions'))
+    BASE_DIR = 'data/3channel_images'
+    test_files = [f for f in os.listdir(BASE_DIR) if f.startswith('test')]
+    for file_name in test_files:
+        file_path = os.path.join(BASE_DIR, file_name)
+        image = rasterio.open(file_path).read()
+        image = np.transpose(image, (1, 2, 0))
+        outputs = predictor(image)  # format is documented at https://detectron2.readthedocs.io/tutorials/models.html#model-output-format
+        v = Visualizer(image,
+                    metadata= MetadataCatalog.get(data_model_config['task']),
+                    scale=0.5,
+                    instance_mode=ColorMode.IMAGE_BW   # remove the colors of unsegmented pixels. This option is only available for segmentation models
+        )
+        out = v.draw_instance_predictions(outputs["instances"].to("cpu"))
+        np.save(f'{cfg.OUTPUT_DIR}/predictions/{file_name[:-4]}.npy', out.get_image())
+
 
