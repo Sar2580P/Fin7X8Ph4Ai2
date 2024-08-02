@@ -15,7 +15,7 @@ class FieldInstanceSegment(pl.LightningModule):
     model.model.to(device)
     self.model = model
     self.config = read_yaml_file(config_path)
-    self.results_dir = self.config['dir']+'/output_masks'
+    self.results_dir = self.config['dir']+'/output_masks/' + model.name
     if not os.path.exists(self.results_dir):
       os.makedirs(self.results_dir)
 
@@ -25,9 +25,9 @@ class FieldInstanceSegment(pl.LightningModule):
   def training_step(self, batch, batch_idx):
     x, ground_mask = batch['image'], batch['mask']
     pred_mask = self.model.forward(x)
-    print(f"Image min: {x.min()}, max: {x.max()}")
-    print(f"Ground min: {ground_mask.min()}, max: {ground_mask.max()}")
-    print(f"Pred min: {pred_mask.min()}, max: {pred_mask.max()}")
+    # print(f"Image min: {x.min()}, max: {x.max()}")
+    # print(f"Ground min: {ground_mask.min()}, max: {ground_mask.max()}")
+    # print(f"Pred min: {pred_mask.min()}, max: {pred_mask.max()}")
     # print(f"pred_mask dtype: {pred_mask.dtype}, shape: {pred_mask.shape}, requires_grad: {pred_mask.requires_grad}")
     # print(f"ground_mask dtype: {ground_mask.dtype}, shape: {ground_mask.shape}, requires_grad: {ground_mask.requires_grad}")
     loss = 1- self.criterion(pred_mask, ground_mask)

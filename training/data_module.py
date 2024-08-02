@@ -10,7 +10,7 @@ class SegmentationDataModule(L.LightningDataModule):
         self.loader_config = read_yaml_file(loader_config_path)
 
     def setup(self, stage: str):
-        df_tr = pd.read_csv('data/train_df.csv')
+        df_tr = pd.read_csv(self.loader_config['train_df'])
         if stage == "fit":
             self.train_set = SegmentationDataset(samples=df_tr, mask_dir=self.loader_config['mask_dir'],
                                                  img_dir=self.loader_config['img_dir'],

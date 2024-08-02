@@ -58,7 +58,7 @@ data_module.setup(stage="test")
 trainer.test(dataloaders=data_module.test_dataloader())
 
 data_module.setup(stage="predict")
-trainer.predict(dataloaders=data_module.predict_dataloader())
+# trainer.predict(dataloaders=data_module.predict_dataloader())
 trainer.predict(dataloaders=data_module.val_dataloader() , ckpt_path='best')
 
 #_____________________________________________________________________________________________________________
@@ -72,4 +72,4 @@ try:
 except Exception as e:
     logger.error(f"Error logging to wandb: {e}")
     logger.info("Logging to wandb failed. Plotting masks locally.")
-    plot_masks(train_dir=training_config['mask_dir'], predicted_dir='results/output_masks', ct=training_config['plot_masks'])
+    plot_masks(train_dir=training_config['mask_dir'], predicted_dir=f'results/output_masks/{model.name}', ct=training_config['plot_masks'])

@@ -94,7 +94,7 @@ class SegmentationDataset(Dataset):
         else:  # for test data
             mask = np.zeros(image.shape[:-1], dtype=np.uint8)
 
-        logger.info(f"min: {np.min(image)}, max: {np.max(image)}")
+        # logger.info(f"min: {np.min(image)}, max: {np.max(image)}")
         # normalise image
         image = (image - np.min(image)) / (np.max(image) - np.min(image))
 

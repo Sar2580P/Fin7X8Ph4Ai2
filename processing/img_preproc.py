@@ -181,7 +181,10 @@ def save_patches(patches, save_dir, prefix , is_mask = False):
     format = 'npy' if is_mask else 'tif'
     for idx, patch in enumerate(patches):
         save_path = os.path.join(save_dir, f"{prefix}-{idx}.{format}")
-        imwrite(save_path, patch)
+        if is_mask:
+            np.save(save_path, patch)
+        else:
+            imwrite(save_path, patch)
 
 def patchify_images_and_masks(image_dir, mask_dir, patch_size, patched_image_dir, patched_mask_dir):
     if not os.path.exists(patched_image_dir):
@@ -207,7 +210,27 @@ def patchify_images_and_masks(image_dir, mask_dir, patch_size, patched_image_dir
         assert len(image_patches) == len(mask_patches), "Number of image patches and mask patches must be equal"
 
         save_patches(image_patches, patched_image_dir, image_file.split('.')[0])
-        save_patches(mask_patches, patched_mask_dir, mask_file.split('.')[0])
+        save_patches(mask_patches, patched_mask_dir, mask_file.split('.')[0] , is_mask=True)
+
+
+def create_patch_df(dir:str ='data' , is_train :bool = True):
+    df = pd.DataFrame(columns = ['img', 'mask'])
+
+    prefix = 'train' if is_train else 'test'
+    train_patched_images = [f for f in os.listdir('data/patched_images') if f.startswith('train')]
+    train_patched_masks = [f for f in os.listdir('data/patched_masks') if f.startswith('train')]
+    test_patched_images = [f for f in os.listdir('data/patched_images') if f.startswith('test')]
+
+    train_patched_images.sort()
+    train_patched_masks.sort()
+
+    for i in range(len(train_patched_images)):
+        img = train_patched_images[i]
+        mask = train_patched_masks[i]
+        df.loc[i] = [img, mask]
+
+    df.to_csv(f'{dir}/{prefix}_patch_df.csv', index = False)
+
 
 if __name__ == '__main__':
     if not os.path.exists('data/train_df.csv'):
@@ -238,3 +261,8 @@ if __name__ == '__main__':
         patchify_images_and_masks(image_dir, mask_dir, patch_size,
                                   patched_image_dir, patched_mask_dir)
         print('Patchifying completed successfully')
+
+    if not os.path.exists('data/train_patch_df.csv'):
+        create_patch_df(is_train=True)
+        # create_patch_df(is_train=False)
+        print('Patch dataframes created successfully')
