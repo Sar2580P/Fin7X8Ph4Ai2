@@ -3,11 +3,15 @@ MAX_EPOCHS : 20
 BATCH_SIZE : 64
 lr : !!float 1e-3
 weight_decay : !!float 1e-5
-log_every_n_steps : 8   # should be less than the number of steps in an epoch, i.e. BATCH_SIZE
+log_every_n_steps : 32   # should be less than the number of steps in an epoch, i.e. BATCH_SIZE
 NUM_WORKERS : 95
+patched_dataset : !!bool True    # whether the dataset comprises of fixed size patches or not
 img_dir : 'data/patched_images'
 mask_dir : 'data/patched_masks'
 train_df : 'data/train_patch_df.csv'
+val_df : 'data/val_patch_df.csv'
+test_df : 'data/test_patch_df.csv'
+predict_df : 'data/predict_patch_df.csv'
 ckpt_file_name : 'Epoch-{epoch}__Loss-{val_loss:.2f}'
 plot_masks : 5
 

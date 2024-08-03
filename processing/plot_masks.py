@@ -24,13 +24,13 @@ def plot_masks(train_dir:str , predicted_dir:str, ct:int = 5):
 
     # Randomly select 5 files from each
     selected_train_files = random.sample(train_files, ct)
-    selected_test_files = random.sample(test_files, ct)
+    # selected_test_files = random.sample(test_files, ct)
     selected_mask_files = selected_train_files
 
 
     # Create and save the plots
     create_and_save_plots(selected_train_files, predicted_dir, 'pics/predicted_train_masks.png')
-    create_and_save_plots(selected_test_files, predicted_dir, 'pics/predicted_test_masks.png')
+    # create_and_save_plots(selected_test_files, predicted_dir, 'pics/predicted_test_masks.png')
     create_and_save_plots(selected_mask_files, train_dir, 'pics/true_train_masks.png')
 
     print('Plots saved successfully.')

@@ -45,18 +45,18 @@ class SegmentationDataset(Dataset):
         samples: pd.DataFrame,
         img_dir: str,
         config_path: str,
+        is_patched_dataset:bool ,
         mask_dir: str = None,
         apply_transform: bool = True,
-        in_train_mode: bool = True
+        in_train_mode: bool = True , 
     ) -> None:
-        self.samples = samples
+        self.samples = pd.read_csv(samples)
         self.apply_transform = apply_transform
         self.in_train_mode = in_train_mode
         self.mask_dir = mask_dir
         self.img_dir = img_dir
         self.config = read_yaml_file(config_path)
-        self.defected_images = []
-
+        self.is_patched_dataset = is_patched_dataset
 
     @property
     def train_transforms(self):
@@ -112,9 +112,10 @@ class SegmentationDataset(Dataset):
         image = Image.fromarray(image)
         mask = Image.fromarray(mask)
 
-        # Apply pre-transforms to the image and mask
-        image = self.pre_transforms(image)
-        mask = self.pre_transforms(mask)
+        if not self.is_patched_dataset:
+            # Apply pre-transforms to the image and mask
+            image = self.pre_transforms(image)
+            mask = self.pre_transforms(mask)
 
         # Apply selection-based augmentation if specified
         if self.apply_transform and self.in_train_mode:

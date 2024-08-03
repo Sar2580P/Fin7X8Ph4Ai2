@@ -4,7 +4,8 @@ from training.train_loop import FieldInstanceSegment
 from pytorch_lightning import Trainer
 from pytorch_lightning.loggers import WandbLogger, CSVLogger
 import os
-from training.callbacks import early_stop_callback, checkpoint_callback, rich_progress_bar, rich_model_summary
+from training.callbacks import (early_stop_callback, checkpoint_callback, 
+                                rich_progress_bar, rich_model_summary)
 from processing.utils import read_yaml_file, logger
 import wandb
 from processing.plot_masks import plot_masks
@@ -58,9 +59,7 @@ data_module.setup(stage="test")
 trainer.test(dataloaders=data_module.test_dataloader())
 
 data_module.setup(stage="predict")
-# trainer.predict(dataloaders=data_module.predict_dataloader())
-trainer.predict(dataloaders=data_module.val_dataloader() , ckpt_path='best')
-
+trainer.predict(dataloaders=data_module.predict_dataloader(), ckpt_path='best')
 #_____________________________________________________________________________________________________________
 
 try:
@@ -72,4 +71,5 @@ try:
 except Exception as e:
     logger.error(f"Error logging to wandb: {e}")
     logger.info("Logging to wandb failed. Plotting masks locally.")
-    plot_masks(train_dir=training_config['mask_dir'], predicted_dir=f'results/output_masks/{model.name}', ct=training_config['plot_masks'])
+    plot_masks(train_dir=training_config['mask_dir'], predicted_dir=f'results/output_masks/{model.name}', 
+               ct=training_config['plot_masks'])
