@@ -1,18 +1,8 @@
-// {
-//     "python.autoComplete.extraPaths": [
-//         "/home/sarvagya/detectron2"
-//     ],
-//     "python.analysis.extraPaths": [
-//         "/home/sarvagya/detectron2"
-//     ]
-// }
-
-
 {
     "python.autoComplete.extraPaths": [
-        "/home/bala/Desktop/sri_krishna/detectron2"
+        "${workspaceFolder}/../detectron2"
     ],
     "python.analysis.extraPaths": [
-        "/home/bala/Desktop/sri_krishna/detectron2"
+        "${workspaceFolder}/../detectron2"
     ]
 }
