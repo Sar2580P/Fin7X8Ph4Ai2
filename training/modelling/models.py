@@ -44,7 +44,7 @@ class SegmentationModels(BaseModel):
             self.name = f"{self.model_naam}__E-{self.config['encoder_name']}__W-{self.config['encoder_weights']}__C-{self.config['in_channels']}"
 
             self.model = smp.FPN(**self.config)
-        elif self.model_naam == 'DeepLabv3':
+        elif self.model_naam == 'DeepLabV3':
             self.name = f"{self.model_naam}__E-{self.config['encoder_name']}__W-{self.config['encoder_weights']}__C-{self.config['in_channels']}"
 
             self.model = smp.DeepLabV3(**self.config)

@@ -26,7 +26,7 @@ class SegmentationDataModule(L.LightningDataModule):
                                                 config_path= 'configs/processing.yaml', apply_transform=False, in_train_mode=False)
 
         if stage == "predict":
-            self.predict_set = SegmentationDataset( samples=self.loader_config['test_df'], is_patched_dataset=self.loader_config['patched_dataset'],
+            self.predict_set = SegmentationDataset( samples=self.loader_config['predict_df'], is_patched_dataset=self.loader_config['patched_dataset'],
                                                     img_dir=self.loader_config['img_dir'],
                                                     config_path= 'configs/processing.yaml', apply_transform=False, in_train_mode=False)
 

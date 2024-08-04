@@ -30,6 +30,7 @@ imagecodecs = "^2024.6.1"
 albumentations = "^1.4.10"
 segmentation-models-pytorch = "^0.3.3"
 pyyaml = "^6.0.1"
+pytorch-toolbelt = "^0.6.3"
 
 
 [tool.poetry.group.dev.dependencies]

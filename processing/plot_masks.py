@@ -19,14 +19,13 @@ def create_and_save_plots(files, directory, output_filename):
 def plot_masks(train_dir:str , predicted_dir:str, ct:int = 5):
     # Get the list of files in each directory
     train_files = [f for f in os.listdir(predicted_dir) if f.startswith('train_') and f.endswith('.npy')]
-    test_files = [f for f in os.listdir(predicted_dir) if f.startswith('test_') and f.endswith('.npy')]
+    # test_files = [f for f in os.listdir(predicted_dir) if f.startswith('test_') and f.endswith('.npy')]
     # train_true_mask_files = [f for f in os.listdir(train_dir) if f.startswith('train_mask_') and f.endswith('.npy')]
 
     # Randomly select 5 files from each
     selected_train_files = random.sample(train_files, ct)
     # selected_test_files = random.sample(test_files, ct)
-    selected_mask_files = selected_train_files
-
+    selected_mask_files =[f.replace('train_', 'train_mask') for f in selected_train_files]
 
     # Create and save the plots
     create_and_save_plots(selected_train_files, predicted_dir, 'pics/predicted_train_masks.png')

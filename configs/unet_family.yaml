@@ -8,6 +8,7 @@ UnetPlusPlus_config :
   # decoder_attention_type: None
   in_channels: 3
   classes: 1
+  activation : 'sigmoid'
 
 
 Unet_config :
@@ -15,7 +16,8 @@ Unet_config :
   encoder_weights: "imagenet"     # use `imagenet` pre-trained weights for encoder initialization
   in_channels: 3                  # model input channels (1 for gray-scale images, 3 for RGB, etc.)
   classes: 1                      # num_classes : (boundary , field_area)
-  apply_preprocessing : False     # adapt images to encoder's weights
+  apply_preprocessing : True     # adapt images to encoder's weights
+  activation : 'sigmoid'
 
 
 FPN_config :
@@ -40,7 +42,7 @@ DeepLabV3_config :
     decoder_channels:  256
     in_channels: 3
     classes:  1
-    # activation: Optional[str] = None,
+    activation: 'sigmoid'
     upsampling:  8
     # aux_params: Optional[dict] = None,
 

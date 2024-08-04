@@ -6,6 +6,11 @@ from processing.utils import read_yaml_file
 from tqdm import tqdm
 from torchmetrics.classification import Dice
 from training.modelling.models import SegmentationModels
+import torch
+from torchmetrics.segmentation import MeanIoU
+from pytorch_toolbelt.losses import JaccardLoss, BinaryFocalLoss
+
+_ = torch.manual_seed(0)
 
 class FieldInstanceSegment(pl.LightningModule):
   def __init__(self, model:SegmentationModels, config_path:str):
@@ -19,54 +24,92 @@ class FieldInstanceSegment(pl.LightningModule):
     if not os.path.exists(self.results_dir):
       os.makedirs(self.results_dir)
 
-    self.criterion = Dice(average='micro')
+    # self.criterion = Dice(average='micro' , ignore_index  = 0)
 
+    self.losses = [
+            ("jaccard", 0.1, JaccardLoss(mode="binary", from_logits=True)),
+            ("focal", 0.9, BinaryFocalLoss()),
+        ]
+
+    self.miou = MeanIoU(num_classes=2, per_class=False, include_background=False)
 
   def training_step(self, batch, batch_idx):
     x, ground_mask = batch['image'], batch['mask']
-    pred_mask = self.model.forward(x)
-    # print(f"Image min: {x.min()}, max: {x.max()}")
-    # print(f"Ground min: {ground_mask.min()}, max: {ground_mask.max()}")
-    # print(f"Pred min: {pred_mask.min()}, max: {pred_mask.max()}")
-    # print(f"pred_mask dtype: {pred_mask.dtype}, shape: {pred_mask.shape}, requires_grad: {pred_mask.requires_grad}")
-    # print(f"ground_mask dtype: {ground_mask.dtype}, shape: {ground_mask.shape}, requires_grad: {ground_mask.requires_grad}")
-    loss = 1- self.criterion(pred_mask, ground_mask)
-    self.log("train_loss", loss, on_step = False, on_epoch=True, prog_bar=True, logger=True)
+    logits = self.model.forward(x)
 
-    return loss.requires_grad_(requires_grad=True)
+    indexed_preds = (logits > self.config['threshold']).int()
+    miou_score = self.miou(indexed_preds, ground_mask)
+
+    total_loss = 0
+    logs = {}
+    for loss_name, weight, loss in self.losses:
+        ls_mask = loss(logits, ground_mask)
+        total_loss += weight * ls_mask
+        logs[f"train_mask_{loss_name}"] = ls_mask
+
+
+    self.log("total_train_loss", total_loss, on_step = True, on_epoch=True, prog_bar=True, logger=True)
+    self.log("jaccard_train_loss", logs['train_mask_jaccard'], on_step = True, on_epoch=True, prog_bar=True, logger=True)
+    self.log("focal_train_loss", logs['train_mask_focal'], on_step = True, on_epoch=True, prog_bar=True, logger=True)
+    self.log("train_miou", miou_score, on_step = True, on_epoch=True, prog_bar=True, logger=True)
+    return {"loss": total_loss}
 
   def validation_step(self, batch, batch_idx):
     x, ground_mask = batch['image'], batch['mask']
-    pred_mask = self.model.forward(x)
-    # print(f"pred_mask dtype: {pred_mask.dtype}, shape: {pred_mask.shape}, requires_grad: {pred_mask.requires_grad}")
-    # print(f"ground_mask dtype: {ground_mask.dtype}, shape: {ground_mask.shape}, requires_grad: {ground_mask.requires_grad}")
-    loss = 1- self.criterion(pred_mask, ground_mask)
-    self.log("val_loss", loss, on_epoch=True, prog_bar=True, logger=True)
-    return loss
+    logits = self.model.forward(x)
+
+    indexed_preds = (logits > self.config['threshold']).int()
+    miou_score = self.miou(indexed_preds, ground_mask)
+
+    total_loss = 0
+    logs = {}
+    for loss_name, weight, loss in self.losses:
+        ls_mask = loss(logits, ground_mask)
+        total_loss += weight * ls_mask
+        logs[f"val_mask_{loss_name}"] = ls_mask
+
+
+    self.log("total_val_loss", total_loss, on_step = True, on_epoch=True, prog_bar=True, logger=True)
+    self.log("jaccard_val_loss", logs['val_mask_jaccard'], on_step = True, on_epoch=True, prog_bar=True, logger=True)
+    self.log("focal_val_loss", logs['val_mask_focal'], on_step = True, on_epoch=True, prog_bar=True, logger=True)
+    self.log("val_miou", miou_score, on_step = True, on_epoch=True, prog_bar=True, logger=True)
+    return {"loss": total_loss}
 
   def test_step(self, batch, batch_idx):
     x, ground_mask = batch['image'], batch['mask']
-    pred_mask = self.model.forward(x)
-    # print(f"pred_mask dtype: {pred_mask.dtype}, shape: {pred_mask.shape}, requires_grad: {pred_mask.requires_grad}")
-    # print(f"ground_mask dtype: {ground_mask.dtype}, shape: {ground_mask.shape}, requires_grad: {ground_mask.requires_grad}")
-    loss = 1- self.criterion(pred_mask, ground_mask)
-    self.log("test_loss", loss, on_epoch=True, prog_bar=True, logger=True)
-    return loss
+    logits = self.model.forward(x)
+
+    indexed_preds = (logits > self.config['threshold']).int()
+    miou_score = self.miou(indexed_preds, ground_mask)
+
+    total_loss = 0
+    logs = {}
+    for loss_name, weight, loss in self.losses:
+        ls_mask = loss(logits, ground_mask)
+        total_loss += weight * ls_mask
+        logs[f"test_mask_{loss_name}"] = ls_mask
+
+
+    self.log("total_test_loss", total_loss, on_step = True, on_epoch=True, prog_bar=True, logger=True)
+    self.log("jaccard_test_loss", logs['test_mask_jaccard'], on_step = True, on_epoch=True, prog_bar=True, logger=True)
+    self.log("focal_test_loss", logs['test_mask_focal'], on_step = True, on_epoch=True, prog_bar=True, logger=True)
+    self.log("test_miou", miou_score, on_step = True, on_epoch=True, prog_bar=True, logger=True)
+    return {"loss": total_loss}
 
   def predict_step(self, batch, batch_idx):
     x , batch_img_name = batch['image'], batch['image_name']
     pred_mask = self.model.forward(x).cpu().detach().numpy()
 
-    for i, img_name in tqdm(enumerate(batch_img_name), desc='saving predicted mask'):
+    for i, img_name in enumerate(batch_img_name):
       np.save(f'{self.results_dir}/{img_name}.npy', pred_mask[i])
     return
 
 
   def configure_optimizers(self):
     optim =  torch.optim.Adam(params=self.model.model.parameters(), lr = self.config['lr'], weight_decay = self.config['weight_decay'])   # https://pytorch.org/docs/stable/optim.html
-    lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optim, patience=3, factor=0.7, threshold=0.005,
+    lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optim, patience=3, factor=0.8, threshold=0.0005,
                                                               cooldown =2,verbose=True)
     # lr_scheduler = torch.optim.lr_scheduler.ExponentialLR(optim,gamma = 0.995 ,last_epoch=-1,   verbose=True)
 
-    return [optim], [{'scheduler': lr_scheduler, 'interval': 'epoch', 'monitor': 'train_loss', 'name': 'lr_scheduler'}]
+    return [optim], [{'scheduler': lr_scheduler, 'interval': 'epoch', 'monitor': 'total_train_loss', 'name': 'lr_scheduler'}]
 

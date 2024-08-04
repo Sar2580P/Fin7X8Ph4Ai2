@@ -146,8 +146,7 @@ def update_annotations(data_dir:str = 'data/original_images', json_file:str = 'd
             height , width = dataset.height , dataset.width
         img['height'], img['width'] = height, width
         for annotation in annotations:
-            bounding_box = get_bounding_box_XYWH_ABS(annotation['segmentation'])
-            annotation['bounding_box'] = bounding_box
+            annotation['bounding_box'] = get_bounding_box_XYWH_ABS(annotation['segmentation'])
             annotation['category_id'] = category_id[annotation['class']]
             annotation['segmentation'] = [annotation['segmentation']]
 
@@ -155,11 +154,11 @@ def update_annotations(data_dir:str = 'data/original_images', json_file:str = 'd
     with open(save_path, 'w') as f:
         json.dump(data, f)
 
-    
+
 
 if __name__ == '__main__':
     processing_config = read_yaml_file('configs/processing.yaml')
-    
+
     if not os.path.exists('data/train_df.csv'):
         create_df(is_train=True)
         create_df(is_train=False)
@@ -183,4 +182,7 @@ if __name__ == '__main__':
         patch_maker = Patch.from_config(patch_config)
         patch_maker.patchify_images_and_masks()
         patch_maker.create_patch_df(is_train=True)
+        patch_maker.generate_segmentation_json('data/train_patch_df.csv', 'data/train_patch_annotation.json')
+        patch_maker.generate_segmentation_json('data/val_patch_df.csv', 'data/val_patch_annotation.json')
+        patch_maker.generate_segmentation_json('data/test_patch_df.csv', 'data/test_patch_annotation.json')
         print('Patchifying completed successfully')

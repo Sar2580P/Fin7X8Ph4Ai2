@@ -14,6 +14,9 @@ import matplotlib.pyplot as plt
 from PIL import Image
 import matplotlib.colors as mcolors
 import random
+import warnings
+
+warnings.filterwarnings('ignore', category=rasterio.errors.NotGeoreferencedWarning)
 
 def check_nan_inf(image:np.ndarray)->bool:
     contains_nan = np.isnan(image).any()
@@ -42,13 +45,13 @@ class PairCompose(transforms.Compose):
 class SegmentationDataset(Dataset):
     def __init__(
         self,
-        samples: pd.DataFrame,
+        samples: str,
         img_dir: str,
         config_path: str,
         is_patched_dataset:bool ,
         mask_dir: str = None,
         apply_transform: bool = True,
-        in_train_mode: bool = True , 
+        in_train_mode: bool = True ,
     ) -> None:
         self.samples = pd.read_csv(samples)
         self.apply_transform = apply_transform
@@ -146,7 +149,7 @@ if __name__ == "__main__":
     save_dir = r"pics"
 
     # Load the samples dataframe
-    samples = pd.read_csv(r"data/train_df.csv")
+    samples = r"data/train_df.csv"
 
     # Create an instance of the SegmentationDataset
     dataset = SegmentationDataset(samples, img_dir, config_path, mask_dir)
@@ -155,8 +158,8 @@ if __name__ == "__main__":
 
     augmented_sample = dataset.__getitem__(idx)
     original_sample = {
-        'image' : rasterio.open(os.path.join(img_dir, samples.iloc[idx , 0])).read()[2],
-        'mask' : np.load(os.path.join(mask_dir, samples.iloc[idx , 1]))
+        'image' : rasterio.open(os.path.join(img_dir, dataset.samples.iloc[idx , 0])).read()[2],
+        'mask' : np.load(os.path.join(mask_dir, dataset.samples.iloc[idx , 1]))
     }
     print(original_sample['image'].shape)
     print(augmented_sample['image'].shape)
@@ -175,6 +178,6 @@ if __name__ == "__main__":
     axes[3].imshow(augmented_sample['mask'].numpy())
     axes[3].set_title("Augmented Mask")
     # super title
-    plt.suptitle(f"Original vs Augmented Image and Mask - {samples.iloc[idx, 0]}")
+    plt.suptitle(f"Original vs Augmented Image and Mask - {dataset.samples.iloc[idx, 0]}")
 
     plt.savefig(os.path.join(save_dir, 'original_vs_augmented.png'))

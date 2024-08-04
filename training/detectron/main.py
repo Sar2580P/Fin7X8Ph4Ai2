@@ -15,7 +15,7 @@ def initialize_config():
     cfg = get_cfg()
     cfg.merge_from_file(model_zoo.get_config_file(data_model_config['model_config_file']))
     cfg.DATASETS.TRAIN = (f"{data_model_config['task']}_train",)
-    cfg.DATASETS.TEST = ()
+    cfg.DATASETS.TEST = (f"{data_model_config['task']}_val",)
     cfg.OUTPUT_DIR = data_model_config['OUTPUT_DIR']
     cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(data_model_config['model_config_file'])
     cfg.DATALOADER.NUM_WORKERS = static_config['NUM_WORKERS']
@@ -45,6 +45,7 @@ if DO_TRAINING:
     trainer.register_all_hooks()
     trainer.resume_or_load(resume=False)
     trainer.train()
+    trainer.test()
 
 else:
     cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")  # path to the model we just trained
@@ -61,7 +62,7 @@ else:
         os.makedirs(f'{cfg.OUTPUT_DIR}/predictions')
 
     print(os.listdir(f'{cfg.OUTPUT_DIR}/predictions'))
-    BASE_DIR = 'data/3channel_images'
+    BASE_DIR = static_config['data']['val_data_dir']
     test_files = [f for f in os.listdir(BASE_DIR) if f.startswith('test')]
     for file_name in test_files:
         file_path = os.path.join(BASE_DIR, file_name)
