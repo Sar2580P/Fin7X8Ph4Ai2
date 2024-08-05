@@ -145,40 +145,68 @@ class SegmentationDataset(Dataset):
 if __name__ == "__main__":
     # Define the paths and parameters
     img_dir = r"data/3channel_images"
-    mask_dir = r"data/masks"
+    mask_dir = r"data/patched_masks"
     config_path = r"configs/processing.yaml"
     save_dir = r"pics"
 
     # Load the samples dataframe
     samples = r"data/train_df.csv"
 
-    # Create an instance of the SegmentationDataset
-    dataset = SegmentationDataset(samples, img_dir, config_path, mask_dir)
+    # # Create an instance of the SegmentationDataset
+    # dataset = SegmentationDataset(samples, img_dir, config_path, mask_dir)
+
+    # idx = np.random.randint(0, 50)
+
+    # augmented_sample = dataset.__getitem__(idx)
+    # original_sample = {
+    #     'image' : rasterio.open(os.path.join(img_dir, dataset.samples.iloc[idx , 0])).read()[2],
+    #     'mask' : np.load(os.path.join(mask_dir, dataset.samples.iloc[idx , 1]))
+    # }
+    # print(original_sample['image'].shape)
+    # print(augmented_sample['image'].shape)
+    # # plot original vs augmented
+    # fig, axes = plt.subplots(1, 4, figsize=(32, 6))
+
+    # axes[0].imshow(original_sample['image'])
+    # axes[0].set_title("Original Image")
+
+    # axes[1].imshow(original_sample['mask'])
+    # axes[1].set_title("Original Mask")
+
+    # axes[2].imshow(augmented_sample['image'][1, :, :])
+    # axes[2].set_title("Augmented Image")
+
+    # axes[3].imshow(augmented_sample['mask'].numpy())
+    # axes[3].set_title("Augmented Mask")
+    # # super title
+    # plt.suptitle(f"Original vs Augmented Image and Mask - {dataset.samples.iloc[idx, 0]}")
+
+    # plt.savefig(os.path.join(save_dir, 'original_vs_augmented.png'))
+#_______________________________________________________________________________________________________________________________
+    img_dir = r"data/patched_images"
+    mask_dir = r"data/patched_masks"
+    config_path = r"configs/processing.yaml"
+    save_dir = r"pics"
+
+    # Load the samples dataframe
+    samples = r"data/test_patch_df.csv"
+
+    #checking image quality based on the threshold values
+    # make a plot showing the masks created with different thresholds
+    thresholds = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+    fig , axes = plt.subplots(3, 3, figsize=(18, 18))
 
     idx = np.random.randint(0, 50)
 
-    augmented_sample = dataset.__getitem__(idx)
-    original_sample = {
-        'image' : rasterio.open(os.path.join(img_dir, dataset.samples.iloc[idx , 0])).read()[2],
-        'mask' : np.load(os.path.join(mask_dir, dataset.samples.iloc[idx , 1]))
-    }
-    print(original_sample['image'].shape)
-    print(augmented_sample['image'].shape)
-    # plot original vs augmented
-    fig, axes = plt.subplots(1, 4, figsize=(32, 6))
+    for num , threshold in enumerate(thresholds):
+        dataset = SegmentationDataset(samples, img_dir, config_path,is_patched_dataset=True , mask_dir=mask_dir, apply_transform=False)
+        dataset.config['mask_threshold'] = threshold
 
-    axes[0].imshow(original_sample['image'])
-    axes[0].set_title("Original Image")
+        sample = dataset.__getitem__(idx)
 
-    axes[1].imshow(original_sample['mask'])
-    axes[1].set_title("Original Mask")
+        #plot the mask
+        axes[num//3, num%3].imshow((sample['mask']*255).numpy())
 
-    axes[2].imshow(augmented_sample['image'][1, :, :])
-    axes[2].set_title("Augmented Image")
-
-    axes[3].imshow(augmented_sample['mask'].numpy())
-    axes[3].set_title("Augmented Mask")
-    # super title
-    plt.suptitle(f"Original vs Augmented Image and Mask - {dataset.samples.iloc[idx, 0]}")
-
-    plt.savefig(os.path.join(save_dir, 'original_vs_augmented.png'))
+        axes[num//3, num%3].set_title(f"Threshold: {threshold}")
+    plt.suptitle(f"Mask quality at different thresholds - {dataset.samples.iloc[idx, 0]}")
+    plt.savefig(os.path.join(save_dir, 'mask_quality_VS_thresholds.png'))

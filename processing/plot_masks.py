@@ -1,7 +1,6 @@
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
-import random
 from PIL import Image
 import os
 import pandas as pd
@@ -85,5 +84,6 @@ def plot_masks(df, true_masks_dir, sample_count=5, masks_dir='results/output_mas
 # df = pd.DataFrame({'filenames': ['mask1.png', 'mask2.png', 'mask3.png', 'mask4.png', 'mask5.png', ...]})
 # plot_masks(df)
 
+if __name__ == '__main__':
 
-plot_masks(df = pd.read_csv('data/test_patch_df.csv') , true_masks_dir='data/patched_masks')
+    plot_masks(df = pd.read_csv('data/test_patch_df.csv') , true_masks_dir='data/patched_masks')

@@ -1,11 +1,11 @@
 # data loading related config
 img_height : 224   # reshaping , ignore if using fixed size patches
 img_width : 224
-mask_threshold : 0.4
+mask_threshold : 0.2
 
 
 # patch related config
-patch_config : 
+patch_config :
   patch_size : 256
   patch_offset : 50
   source_image_dir : 'data/3channel_images'
