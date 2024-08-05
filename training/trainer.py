@@ -51,25 +51,14 @@ def log_images(logger:WandbLogger):
 trainer = Trainer(callbacks=[early_stop_callback, checkpoint_callback, rich_progress_bar, rich_model_summary],
                   accelerator = 'gpu' ,max_epochs=training_config['MAX_EPOCHS'], logger=[wandb_logger, csv_logger])
 
-data_module.setup(stage="fit")
-trainer.fit(model = segmentation_setup , train_dataloaders=data_module.train_dataloader(),
-            val_dataloaders=data_module.val_dataloader())
+# data_module.setup(stage="fit")
+# trainer.fit(model = segmentation_setup , train_dataloaders=data_module.train_dataloader(),
+#             val_dataloaders=data_module.val_dataloader() , ckpt_path='last')
 
-data_module.setup(stage="test")
-trainer.test(dataloaders=data_module.test_dataloader())
+# data_module.setup(stage="test")
+# trainer.test(dataloaders=data_module.test_dataloader())
 
 data_module.setup(stage="predict")
-trainer.predict(dataloaders=data_module.predict_dataloader(), ckpt_path='best')
+trainer.predict(dataloaders=data_module.predict_dataloader(), model=segmentation_setup , ckpt_path='last')
 #_____________________________________________________________________________________________________________
 
-try:
-    # log hyperparameters
-    # wandb_logger.log_hyperparams(training_config)
-
-    # log images
-    log_images(wandb_logger)
-except Exception as e:
-    logger.error(f"Error logging to wandb: {e}")
-    logger.info("Logging to wandb failed. Plotting masks locally.")
-    plot_masks(train_dir=training_config['mask_dir'], predicted_dir=f'results/output_masks/{model.name}',
-               ct=training_config['plot_masks'])

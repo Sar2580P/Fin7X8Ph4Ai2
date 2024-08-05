@@ -30,6 +30,7 @@ class SegmentationDataModule(L.LightningDataModule):
                                                     img_dir=self.loader_config['img_dir'],
                                                     config_path= 'configs/processing.yaml', apply_transform=False, in_train_mode=False)
 
+
     def train_dataloader(self):
         return DataLoader(self.train_set, batch_size=self.loader_config['BATCH_SIZE'], shuffle=True,
                           num_workers=self.loader_config['NUM_WORKERS'])

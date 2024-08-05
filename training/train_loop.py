@@ -97,10 +97,11 @@ class FieldInstanceSegment(pl.LightningModule):
     return {"loss": total_loss}
 
   def predict_step(self, batch, batch_idx):
-    x , batch_img_name = batch['image'], batch['image_name']
+
+    x , batch_mask_name = batch['image'], batch['mask_name']
     pred_mask = self.model.forward(x).cpu().detach().numpy()
 
-    for i, img_name in enumerate(batch_img_name):
+    for i, img_name in enumerate(batch_mask_name):
       np.save(f'{self.results_dir}/{img_name}.npy', pred_mask[i])
     return
 

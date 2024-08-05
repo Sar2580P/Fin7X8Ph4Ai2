@@ -137,7 +137,8 @@ class SegmentationDataset(Dataset):
         return {
             "image": image.float(),
             "mask": mask,
-            "image_name": image_name.split('.')[0]
+            "image_name": image_name.split('.')[0] ,
+            'mask_name': mask_name.split('.')[0]
         }
 
 

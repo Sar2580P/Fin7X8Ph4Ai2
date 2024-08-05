@@ -1,5 +1,5 @@
 dir : 'results'
-MAX_EPOCHS : 20
+MAX_EPOCHS : 1
 BATCH_SIZE : 32
 lr : !!float 1e-4
 threshold : !!float 0.7
@@ -12,7 +12,7 @@ mask_dir : 'data/patched_masks'
 train_df : 'data/train_patch_df.csv'
 val_df : 'data/val_patch_df.csv'
 test_df : 'data/test_patch_df.csv'
-predict_df : 'data/predict_patch_df.csv'
+predict_df : 'data/test_patch_df.csv'
 ckpt_file_name : 'Epoch-{epoch}__Loss-{val_loss:.2f}'
 plot_masks : 5
 
