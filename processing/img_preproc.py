@@ -45,24 +45,38 @@ def convert_to_geojson(data:dict, save_path:str = None):
     polygons.to_file(save_path, driver="GeoJSON")
   return polygons
 
+import numpy as np
+import os
+import cv2
+from geopandas import GeoDataFrame
 
 def create_mask_polygons(height: int, width: int, polygons: GeoDataFrame, save_path: str):
     # Ensure the save directory exists
 
     mask = np.zeros((height, width), dtype=np.uint8)
-    for i, poly in enumerate(polygons):
-      poly = np.array(poly.exterior.coords)
-      poly = np.array([[x, y] for x, y in poly], dtype=np.int32)
-      mask = cv2.fillPoly(mask, [poly], color=1)
+    for i, poly in enumerate(polygons.geometry):
+        poly = np.array(poly.exterior.coords)
+        poly = np.array([[x, y] for x, y in poly], dtype=np.int32)
+        mask = cv2.fillPoly(mask, [poly], color=1)
 
-    # Save the mask as a .npy file
+    # # Create the complement mask
+    # complement_mask = np.bitwise_xor(mask, 1)
+
+    # # Stack the original and complement masks
+    # mask = np.stack((complement_mask, mask), axis=-1)
+    # assert mask.shape == (height, width, 2) , 'Mask shape is not correct'
+
+    # Save the new mask as a .npy file
     save_path = os.path.join(f'{save_path}.npy')
     np.save(save_path, mask)
 
 
 
+
+
+
 def create_masks():
-    with open("data/train_annotation.json") as f:
+    with open("data/train_annotations.json") as f:
         data = json.load(f)
 
     dir = 'data/masks'

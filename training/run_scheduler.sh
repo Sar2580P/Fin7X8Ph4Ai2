@@ -3,6 +3,7 @@
 # Define the range of folds and the list of model names
 model_names=('Unet' 'UnetPlusPlus' 'FPN' 'DeepLabV3')
 yaml_file="configs/unet_family.yaml"  # Path to your YAML file
+mask_plot_file = 'processing/plot_masks.py'
 
 # Function to update the YAML file
 update_yaml() {
@@ -42,6 +43,8 @@ for model_name in "${model_names[@]}"; do
     wait
 
     echo "Completed model_name = $model_name"
+
 done
+python $mask_plot_file &
 
 echo "All combinations have been processed."

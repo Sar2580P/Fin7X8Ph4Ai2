@@ -56,8 +56,7 @@ class SegmentationModels(BaseModel):
     config = ConfigDict(arbitrary_types_allowed=True)
 
     def forward(self, x)->torch.Tensor :
-        if self.config.get('apply_preprocessing', False):
-            x = self.preproc_func(x)
+        # x = self.preproc_func(x)
 
         # output : torch.Size([batch_sz, num_classes, h, w])
         x = self.model(x)

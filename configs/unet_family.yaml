@@ -22,7 +22,7 @@ FPN_config:
 UnetPlusPlus_config:
   activation: sigmoid
   classes: 1
-  decoder_channels: (256, 128, 64, 32, 16)
+  decoder_attention_type: scse
   decoder_use_batchnorm: true
   encoder_depth: 5
   encoder_name: resnet50
@@ -31,7 +31,8 @@ UnetPlusPlus_config:
 Unet_config:
   activation: sigmoid
   classes: 1
+  decoder_attention_type: scse
   encoder_name: resnet50
   encoder_weights: imagenet
   in_channels: 3
-model_name: Unet
+model_name: DeepLabV3

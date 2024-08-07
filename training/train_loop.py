@@ -12,6 +12,8 @@ from pytorch_toolbelt.losses import JaccardLoss, BinaryFocalLoss
 
 _ = torch.manual_seed(0)
 
+
+
 class FieldInstanceSegment(pl.LightningModule):
   def __init__(self, model:SegmentationModels, config_path:str):
     super().__init__()
@@ -27,8 +29,8 @@ class FieldInstanceSegment(pl.LightningModule):
     # self.criterion = Dice(average='micro' , ignore_index  = 0)
 
     self.losses = [
-            ("jaccard", 0.1, JaccardLoss(mode="binary", from_logits=True)),
-            ("focal", 0.9, BinaryFocalLoss()),
+            ("jaccard", 0.1, JaccardLoss(mode="binary", from_logits=True )),
+            ("focal", 0.9, BinaryFocalLoss(alpha=0.4, gamma=2.3)),
         ]
 
     self.miou = MeanIoU(num_classes=2, per_class=False, include_background=False)
@@ -101,8 +103,8 @@ class FieldInstanceSegment(pl.LightningModule):
     x , batch_mask_name = batch['image'], batch['mask_name']
     pred_mask = self.model.forward(x).cpu().detach().numpy()
 
-    for i, img_name in enumerate(batch_mask_name):
-      np.save(f'{self.results_dir}/{img_name}.npy', pred_mask[i])
+    for i, mask_name in enumerate(batch_mask_name):
+      np.save(f'{self.results_dir}/{mask_name.strip()}.npy', pred_mask[i])
     return
 
 

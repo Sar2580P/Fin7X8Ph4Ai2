@@ -79,7 +79,7 @@ class Patch(BaseModel):
 
             image = imread(image_path)
             mask = np.load(mask_path)
-            assert image.shape[:2] == mask.shape[:2], f"Image :{image.shape[:2]} and mask: {mask.shape[:2]} have different dimensions"
+            assert image.shape[:2] == mask.shape[:2], f"Image :{image.shape[:2]} and mask: {mask.shape[:2]} have different dimensions  {image_file} and {mask_file}"
             image_patches = self.patchify_image(image)
             mask_patches = self.patchify_mask(mask)
 

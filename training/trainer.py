@@ -49,7 +49,8 @@ def log_images(logger:WandbLogger):
 
 #_____________________________________________________________________________________________________________
 trainer = Trainer(callbacks=[early_stop_callback, checkpoint_callback, rich_progress_bar, rich_model_summary],
-                  accelerator = 'gpu' ,max_epochs=training_config['MAX_EPOCHS'], logger=[wandb_logger, csv_logger])
+                  accelerator = 'gpu' ,max_epochs=training_config['MAX_EPOCHS'], logger=[wandb_logger, csv_logger] ,
+                  accumulate_grad_batches=training_config['GRAD_ACCUMULATION_STEPS'])
 
 data_module.setup(stage="fit")
 trainer.fit(model = segmentation_setup , train_dataloaders=data_module.train_dataloader(),
