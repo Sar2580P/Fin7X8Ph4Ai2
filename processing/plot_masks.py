@@ -13,7 +13,8 @@ def plot_masks(df, true_masks_dir, sample_count=5, masks_dir='results/output_mas
 
     # Get unique model names from the directory
     model_names = os.listdir(masks_dir)
-
+    model_names.sort()
+    model_names = model_names
     # Set up the plot
     num_models = len(model_names) + 1  # Add one for the true masks row
     fig, axes = plt.subplots(num_models, sample_count, figsize=(sample_count * 5, num_models * 5))

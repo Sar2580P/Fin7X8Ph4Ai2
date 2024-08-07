@@ -3,7 +3,7 @@ MAX_EPOCHS : 25
 BATCH_SIZE : 16
 GRAD_ACCUMULATION_STEPS : 4
 lr : !!float 0.00007
-threshold : !!float 0.4
+threshold : !!float 0.1
 weight_decay : !!float 1e-8
 log_every_n_steps : 32   # should be less than the number of steps in an epoch, i.e. BATCH_SIZE
 NUM_WORKERS : 95
