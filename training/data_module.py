@@ -1,12 +1,7 @@
 import lightning as L
 from torch.utils.data import  DataLoader
 from processing.data_loading import SegmentationDataset
-import pandas as pd
 from processing.utils import read_yaml_file
-import torch
-
-
-
 
 class SegmentationDataModule(L.LightningDataModule):
     def __init__(self, loader_config_path: str):

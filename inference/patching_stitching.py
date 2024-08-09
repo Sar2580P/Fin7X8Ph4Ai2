@@ -75,10 +75,15 @@ class ImagePatcher:
             
         df.to_csv(os.path.join(self.output_dir, 'patches_metadata.csv'), index=False)
 
-    def reconstruct_padded_image(self, json_data_path, patch_shape=(256, 256)):
+    def reconstruct_image(self, json_data_path, patch_shape=(256, 256)):
         # Read the JSON file
         with open(json_data_path) as f:
             json_data = json.load(f)
+            
+        if not os.path.exists(self.reconstruct_save_dir):
+            os.makedirs(self.reconstruct_save_dir)
+            
+        assert os.path.exists(self.mask_patch_dir), f"mask_patch_dir: {self.mask_patch_dir} does not exist"
         
         for img_idx in range(len(json_data)):
             meta_data = json_data[str(img_idx)][0]

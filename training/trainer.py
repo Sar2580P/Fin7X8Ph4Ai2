@@ -46,17 +46,17 @@ data_module.setup(stage="test")
 trainer.test(dataloaders=data_module.test_dataloader() , ckpt_path='last')
 
 
-# data_module.setup(stage="predict")
-# trainer.predict(dataloaders=data_module.predict_dataloader(), model=segmentation_setup , ckpt_path='last')
-
-ckpt_files = os.listdir(checkpoint_callback.dirpath)
 data_module.setup(stage="predict")
-model_name = model.name
-for ckpt_file in ckpt_files:
-    ckpt_path = os.path.join(checkpoint_callback.dirpath, ckpt_file)
-    model.name = model_name+ f"_{ckpt_file.split('_')[0]}"
-    trainer.predict(dataloaders=data_module.predict_dataloader(), model=segmentation_setup , ckpt_path=ckpt_path)
-model.name = model_name
+trainer.predict(dataloaders=data_module.predict_dataloader(), model=segmentation_setup , ckpt_path='last')
+
+# ckpt_files = os.listdir(checkpoint_callback.dirpath)
+# data_module.setup(stage="predict")
+# model_name = model.name
+# for ckpt_file in ckpt_files:
+#     ckpt_path = os.path.join(checkpoint_callback.dirpath, ckpt_file)
+#     model.name = model_name+ f"_{ckpt_file.split('_')[0]}"
+#     trainer.predict(dataloaders=data_module.predict_dataloader(), model=segmentation_setup , ckpt_path=ckpt_path)
+# model.name = model_name
 #_____________________________________________________________________________________________________________
 
 # checkpoint = torch.load('results/ckpts/DeepLabV3__E-resnet50__W-imagenet__C-3/Epoch-epoch=0__Loss-val_loss=0.00.ckpt')

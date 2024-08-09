@@ -126,6 +126,7 @@ class FieldInstanceSegment(pl.LightningModule):
     save_dir = self.results_dir + self.model.name
     if not os.path.exists(save_dir):
       os.makedirs(save_dir)
+      
     for i, mask_name in enumerate(batch_mask_name):
       np.save(f'{save_dir}/{mask_name.strip()}.npy', pred_mask[i])
     return
