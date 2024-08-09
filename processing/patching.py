@@ -5,6 +5,10 @@ from tqdm import tqdm
 from sklearn.model_selection import train_test_split
 from pydantic import BaseModel, DirectoryPath, PositiveInt, field_validator, ValidationInfo
 from tifffile import imread , imsave
+from typing import List
+import os
+import cv2
+import json
 
 class Patch(BaseModel):
     source_image_dir: DirectoryPath
@@ -20,8 +24,8 @@ class Patch(BaseModel):
     #     if patch_size is not None and v >= patch_size:
     #         raise ValueError('Offset must be less than patch size.')
     #     return v
-    
-    
+
+
     @classmethod
     def from_config(cls, config: dict):
         return cls(**config)
@@ -75,7 +79,7 @@ class Patch(BaseModel):
 
             image = imread(image_path)
             mask = np.load(mask_path)
-            assert image.shape[:2] == mask.shape[:2], f"Image :{image.shape[:2]} and mask: {mask.shape[:2]} have different dimensions"
+            assert image.shape[:2] == mask.shape[:2], f"Image :{image.shape[:2]} and mask: {mask.shape[:2]} have different dimensions  {image_file} and {mask_file}"
             image_patches = self.patchify_image(image)
             mask_patches = self.patchify_mask(mask)
 
@@ -113,3 +117,67 @@ class Patch(BaseModel):
         val_df.to_csv(f'{dir}/val_patch_df.csv', index=False)
         test_df.to_csv(f'{dir}/test_patch_df.csv', index=False)
         return
+
+    def get_bounding_box_XYWH_ABS(self, polygon_coords:List)->List:
+        # Extract x and y coordinates
+        x_coords = polygon_coords[0::2]
+        y_coords = polygon_coords[1::2]
+
+        # Compute the top-left corner (min x, min y)
+        x_min = min(x_coords)
+        y_min = min(y_coords)
+
+        # Compute the width and height
+        width = max(x_coords) - x_min
+        height = max(y_coords) - y_min
+
+        return [x_min, y_min, width, height]
+
+
+    def generate_segmentation_json(self, csv_file_path, output_json_path):
+        data = {"images": []}
+
+        # Load the CSV file
+        df = pd.read_csv(csv_file_path)
+        category_id = {'field'  : 0} # only one category
+
+        # Iterate through each row in the DataFrame
+        for index, row in tqdm(df.iterrows() , desc = 'Generating segmentation JSON for patches'):
+            image_file = row['img']
+            mask_file = row['mask']
+
+            # Construct full paths for image and mask
+            image_path = os.path.join(self.save_patch_img_dir, image_file)
+            mask_path = os.path.join(self.save_patch_mask_dir, mask_file)
+
+            if os.path.exists(mask_path):
+                # Load the mask
+                mask = np.load(mask_path)
+                mask = mask.astype(np.uint8)  # Ensure mask is in uint8 format
+
+                # Find contours in the mask
+                contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+                # Prepare annotations
+                annotations = []
+                for contour in contours:
+                    # Get the x, y coordinates of the contour
+                    segmentation = contour.flatten().tolist()
+                    annotations.append({
+                        "class": "field",  # Adjust class if needed
+                        "segmentation": [segmentation] ,
+                        'bounding_box': self.get_bounding_box_XYWH_ABS(segmentation) ,
+                        'category_id': category_id['field']
+                    })
+
+                # Append image data to the main data structure
+                data["images"].append({
+                    "file_name": image_file,
+                    "annotations": annotations ,
+                    'height': mask.shape[0],
+                    'width': mask.shape[1]
+                })
+
+        # Save the generated data to a JSON file
+        with open(output_json_path, 'w') as json_file:
+            json.dump(data, json_file, indent=4)

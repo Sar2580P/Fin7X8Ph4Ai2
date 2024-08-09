@@ -39,9 +39,10 @@ def register_lightdata(data_config:Dict):
             f"{task}_{d}",
             lambda data_dir=data_dir, annot_path=annot_path: create_lightdata_for_instance_seg(data_dir, annot_path)
         )
-    MetadataCatalog.get(task).thing_classes = data_config['categories']
-    MetadataCatalog.get(task).thing_colors = data_config['thing_colors']  # RGB colors for each class
-    MetadataCatalog.get(task).evaluator_type = data_config['evaluator_type']
+        MetadataCatalog.get(f"{task}_{d}").evaluator_type = data_config['evaluator_type']
+        MetadataCatalog.get(f"{task}_{d}").thing_classes = data_config['categories']
+        MetadataCatalog.get(f"{task}_{d}").thing_colors = data_config['thing_colors']  # RGB colors for each class
+
 
     # logger.info(DatasetCatalog.get('field_instance_segmentation_train'))
 

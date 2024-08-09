@@ -1,8 +1,10 @@
 dir : 'results'
-MAX_EPOCHS : 20
-BATCH_SIZE : 64
-lr : !!float 1e-3
-weight_decay : !!float 1e-5
+MAX_EPOCHS : 25
+BATCH_SIZE : 16
+GRAD_ACCUMULATION_STEPS : 4
+lr : !!float 0.00007
+threshold : !!float 0.1
+weight_decay : !!float 1e-8
 log_every_n_steps : 32   # should be less than the number of steps in an epoch, i.e. BATCH_SIZE
 NUM_WORKERS : 95
 patched_dataset : !!bool True    # whether the dataset comprises of fixed size patches or not
@@ -11,19 +13,20 @@ mask_dir : 'data/patched_masks'
 train_df : 'data/train_patch_df.csv'
 val_df : 'data/val_patch_df.csv'
 test_df : 'data/test_patch_df.csv'
-predict_df : 'data/predict_patch_df.csv'
+predict_df : 'data/test_patch_df.csv'
 ckpt_file_name : 'Epoch-{epoch}__Loss-{val_loss:.2f}'
 plot_masks : 5
+
 
 # CALLBACK related config
 callbacks:
   ModelCheckpoint:
-    monitor: 'train_loss'
+    monitor: 'total_val_loss'
     mode: 'min'
-    save_top_k: 2
+    save_top_k: 5
     save_last: True
   EarlyStopping:
-    monitor: 'val_loss'
+    monitor: 'total_val_loss'
     mode: 'min'
-    min_delta : 0.0001
+    min_delta : 0.00005
     patience : 8

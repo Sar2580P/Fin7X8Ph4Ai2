@@ -1,49 +1,38 @@
-
-UnetPlusPlus_config :
-  encoder_name: "resnet50"
-  encoder_depth: 5
-  encoder_weights: "imagenet"
-  decoder_use_batchnorm: True
-  # decoder_channels:  (256, 128, 64, 32, 16)
-  # decoder_attention_type: None
-  in_channels: 3
+DeepLabV3_config:
+  activation: sigmoid
   classes: 1
-
-
-Unet_config :
-  encoder_name : 'resnet34'
-  encoder_weights: "imagenet"     # use `imagenet` pre-trained weights for encoder initialization
-  in_channels: 3                  # model input channels (1 for gray-scale images, 3 for RGB, etc.)
-  classes: 1                      # num_classes : (boundary , field_area)
-  apply_preprocessing : False     # adapt images to encoder's weights
-
-
-FPN_config :
-  encoder_name: 'resnet34'
+  decoder_channels: 256
   encoder_depth: 5
-  encoder_weights: 'imagenet'
+  encoder_name: resnet50
+  encoder_weights: imagenet
+  in_channels: 3
+  upsampling: 8
+FPN_config:
+  activation: sigmoid
+  classes: 1
+  decoder_dropout: 0.2
+  decoder_merge_policy: add
   decoder_pyramid_channels: 256
   decoder_segmentation_channels: 128
-  decoder_merge_policy: 'add'
-  decoder_dropout: 0.2
+  encoder_depth: 5
+  encoder_name: resnet50
+  encoder_weights: imagenet
   in_channels: 3
-  classes: 1
-  # activation: None
   upsampling: 4
-  # aux_params=None
-
-
-DeepLabV3_config :
-    encoder_name:  "resnet34"
-    encoder_depth:  5
-    encoder_weights: "imagenet"
-    decoder_channels:  256
-    in_channels: 3
-    classes:  1
-    # activation: Optional[str] = None,
-    upsampling:  8
-    # aux_params: Optional[dict] = None,
-
-
-
-model_name : 'UnetPlusPlus'  # 'Unet' , 'UnetPlusPlus' , 'FPN' , 'DeepLabV3'
+UnetPlusPlus_config:
+  activation: sigmoid
+  classes: 1
+  decoder_attention_type: scse
+  decoder_use_batchnorm: true
+  encoder_depth: 5
+  encoder_name: resnet50
+  encoder_weights: imagenet
+  in_channels: 3
+Unet_config:
+  activation: sigmoid
+  classes: 1
+  decoder_attention_type: scse
+  encoder_name: resnet50
+  encoder_weights: imagenet
+  in_channels: 3
+model_name: DeepLabV3

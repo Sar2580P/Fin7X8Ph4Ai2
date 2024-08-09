@@ -10,7 +10,7 @@ early_stop_callback = EarlyStopping(
    min_delta=callback_configs['EarlyStopping']['min_delta'],
    patience=callback_configs['EarlyStopping']['patience'],
    verbose=True,
-   mode=callback_configs['EarlyStopping']['mode'], 
+   mode=callback_configs['EarlyStopping']['mode'],
 )
 
 theme = RichProgressBarTheme(metrics='green', time='yellow', progress_bar_finished='#8c53e0' ,progress_bar='#c99e38')

@@ -102,5 +102,4 @@ class TIFF_Mapper(DatasetMapper):
 
         if "annotations" in dataset_dict:
             self._transform_annotations(dataset_dict, transforms, image_shape)
-
         return dataset_dict

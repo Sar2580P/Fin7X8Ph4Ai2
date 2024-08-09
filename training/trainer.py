@@ -4,7 +4,7 @@ from training.train_loop import FieldInstanceSegment
 from pytorch_lightning import Trainer
 from pytorch_lightning.loggers import WandbLogger, CSVLogger
 import os
-from training.callbacks import (early_stop_callback, checkpoint_callback, 
+from training.callbacks import (early_stop_callback, checkpoint_callback,
                                 rich_progress_bar, rich_model_summary)
 from processing.utils import read_yaml_file, logger
 import wandb
@@ -18,6 +18,8 @@ data_module = SegmentationDataModule(loader_config_path='configs/trainer.yaml')
 model = SegmentationModels(config_path='configs/unet_family.yaml')
 model.get_model()
 
+
+
 segmentation_setup = FieldInstanceSegment(config_path='configs/trainer.yaml', model=model)
 
 #_____________________________________________________________________________________________________________
@@ -30,46 +32,32 @@ run_name = f"lr-{training_config['lr']}__bs-{training_config['BATCH_SIZE']}__dec
 wandb_logger = WandbLogger(project= f"{model.name}", name = training_config['ckpt_file_name'])
 csv_logger = CSVLogger(training_config['dir']+f"/{model.name}/"+'/logs/'+  training_config['ckpt_file_name'])
 
-def log_images(logger:WandbLogger):
-    train_cols = ["caption", "sentinal-2_image", "ground_mask", "predicted_mask"]
-    test_cols = ["caption", "sentinal-2_image", "predicted_mask"]
-    train_data, test_data = [] , []
-
-    for i in range(50):
-
-        train_data.append([f"train_{i}.tif", wandb.Image(data_or_path = f"{training_config['img_dir']}/train_{i}.tif"),
-                           wandb.Image(data_or_path = f"{training_config['mask_dir']}/train_mask{i}.npy"),
-                           wandb.Image(data_or_path = f"results/output_masks/train_mask{i}.npy")])
-
-        test_data.append([f"test_{i}.tif", wandb.Image(data_or_path = f"{training_config['img_dir']}/test_{i}.tif"),
-                          wandb.Image(data_or_path = f"results/output_masks/test_mask{i}.npy")])
-
-    logger.log_table(key="Training Samples", columns=train_cols, data=train_data)
-    logger.log_table(key="Test Samples", columns=test_cols, data=test_data)
-
 #_____________________________________________________________________________________________________________
+torch.cuda.empty_cache()
 trainer = Trainer(callbacks=[early_stop_callback, checkpoint_callback, rich_progress_bar, rich_model_summary],
-                  accelerator = 'gpu' ,max_epochs=training_config['MAX_EPOCHS'], logger=[wandb_logger, csv_logger])
+                  accelerator = 'gpu' ,max_epochs=training_config['MAX_EPOCHS'], logger=[wandb_logger, csv_logger] ,
+                  accumulate_grad_batches=training_config['GRAD_ACCUMULATION_STEPS'])
 
 data_module.setup(stage="fit")
 trainer.fit(model = segmentation_setup , train_dataloaders=data_module.train_dataloader(),
-            val_dataloaders=data_module.val_dataloader())
+            val_dataloaders=data_module.val_dataloader() , ckpt_path='last')
 
 data_module.setup(stage="test")
-trainer.test(dataloaders=data_module.test_dataloader())
+trainer.test(dataloaders=data_module.test_dataloader() , ckpt_path='last')
 
+
+# data_module.setup(stage="predict")
+# trainer.predict(dataloaders=data_module.predict_dataloader(), model=segmentation_setup , ckpt_path='last')
+
+ckpt_files = os.listdir(checkpoint_callback.dirpath)
 data_module.setup(stage="predict")
-trainer.predict(dataloaders=data_module.predict_dataloader(), ckpt_path='best')
+model_name = model.name
+for ckpt_file in ckpt_files:
+    ckpt_path = os.path.join(checkpoint_callback.dirpath, ckpt_file)
+    model.name = model_name+ f"_{ckpt_file.split('_')[0]}"
+    trainer.predict(dataloaders=data_module.predict_dataloader(), model=segmentation_setup , ckpt_path=ckpt_path)
+model.name = model_name
 #_____________________________________________________________________________________________________________
 
-try:
-    # log hyperparameters
-    # wandb_logger.log_hyperparams(training_config)
-
-    # log images
-    log_images(wandb_logger)
-except Exception as e:
-    logger.error(f"Error logging to wandb: {e}")
-    logger.info("Logging to wandb failed. Plotting masks locally.")
-    plot_masks(train_dir=training_config['mask_dir'], predicted_dir=f'results/output_masks/{model.name}', 
-               ct=training_config['plot_masks'])
+# checkpoint = torch.load('results/ckpts/DeepLabV3__E-resnet50__W-imagenet__C-3/Epoch-epoch=0__Loss-val_loss=0.00.ckpt')
+# print(checkpoint['state_dict'].keys())

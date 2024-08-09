@@ -45,24 +45,38 @@ def convert_to_geojson(data:dict, save_path:str = None):
     polygons.to_file(save_path, driver="GeoJSON")
   return polygons
 
+import numpy as np
+import os
+import cv2
+from geopandas import GeoDataFrame
 
 def create_mask_polygons(height: int, width: int, polygons: GeoDataFrame, save_path: str):
     # Ensure the save directory exists
 
     mask = np.zeros((height, width), dtype=np.uint8)
-    for i, poly in enumerate(polygons):
-      poly = np.array(poly.exterior.coords)
-      poly = np.array([[x, y] for x, y in poly], dtype=np.int32)
-      mask = cv2.fillPoly(mask, [poly], color=1)
+    for i, poly in enumerate(polygons.geometry):
+        poly = np.array(poly.exterior.coords)
+        poly = np.array([[x, y] for x, y in poly], dtype=np.int32)
+        mask = cv2.fillPoly(mask, [poly], color=1)
 
-    # Save the mask as a .npy file
+    # # Create the complement mask
+    # complement_mask = np.bitwise_xor(mask, 1)
+
+    # # Stack the original and complement masks
+    # mask = np.stack((complement_mask, mask), axis=-1)
+    # assert mask.shape == (height, width, 2) , 'Mask shape is not correct'
+
+    # Save the new mask as a .npy file
     save_path = os.path.join(f'{save_path}.npy')
     np.save(save_path, mask)
 
 
 
+
+
+
 def create_masks():
-    with open("data/train_annotation.json") as f:
+    with open("data/train_annotations.json") as f:
         data = json.load(f)
 
     dir = 'data/masks'
@@ -146,8 +160,7 @@ def update_annotations(data_dir:str = 'data/original_images', json_file:str = 'd
             height , width = dataset.height , dataset.width
         img['height'], img['width'] = height, width
         for annotation in annotations:
-            bounding_box = get_bounding_box_XYWH_ABS(annotation['segmentation'])
-            annotation['bounding_box'] = bounding_box
+            annotation['bounding_box'] = get_bounding_box_XYWH_ABS(annotation['segmentation'])
             annotation['category_id'] = category_id[annotation['class']]
             annotation['segmentation'] = [annotation['segmentation']]
 
@@ -155,11 +168,11 @@ def update_annotations(data_dir:str = 'data/original_images', json_file:str = 'd
     with open(save_path, 'w') as f:
         json.dump(data, f)
 
-    
+
 
 if __name__ == '__main__':
     processing_config = read_yaml_file('configs/processing.yaml')
-    
+
     if not os.path.exists('data/train_df.csv'):
         create_df(is_train=True)
         create_df(is_train=False)
@@ -183,4 +196,7 @@ if __name__ == '__main__':
         patch_maker = Patch.from_config(patch_config)
         patch_maker.patchify_images_and_masks()
         patch_maker.create_patch_df(is_train=True)
+        patch_maker.generate_segmentation_json('data/train_patch_df.csv', 'data/train_patch_annotation.json')
+        patch_maker.generate_segmentation_json('data/val_patch_df.csv', 'data/val_patch_annotation.json')
+        patch_maker.generate_segmentation_json('data/test_patch_df.csv', 'data/test_patch_annotation.json')
         print('Patchifying completed successfully')

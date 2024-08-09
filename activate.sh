@@ -21,5 +21,6 @@ wandb login --relogin "$WANDB_API"
 # fi
 export PYTHONPATH="${PYTHONPATH}:$(pwd)"
 export PYTHONPATH="${PYTHONPATH}:$(dirname $(pwd))/detectron2"
+chmod +x training/run_scheduler.sh
 poetry shell
 

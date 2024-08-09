@@ -1,22 +1,20 @@
 import segmentation_models_pytorch as smp
-from pydantic import BaseModel, field_validator, ConfigDict
-from typing import Any, Dict, Callable
 from processing.utils import read_yaml_file
 from segmentation_models_pytorch.encoders import get_preprocessing_fn
 import torch
+import torch.nn as nn
 
-class SegmentationModels(BaseModel):
-    config: Dict[str, Any] = None
-    config_path: str
-    model: smp.UnetPlusPlus = None
-    preproc_func: Callable = None
-    name : str = None
-    model_naam:str = None
-    config: Dict[str, Any] = None
+class SegmentationModels(nn.Module):
+    def __init__(self, config_path: str):
+        super(SegmentationModels, self).__init__()
+        self.config_path = config_path
+        self.model = None
+        self.preproc_func = None
+        self.name = None
+        self.model_naam = None
+        self.config = None
 
-    class Config:
-        arbitrary_types_allowed = True
-        protected_namespaces = ()
+        self.get_model()
 
     def get_model(self):
         self.config = read_yaml_file(self.config_path)
@@ -33,35 +31,23 @@ class SegmentationModels(BaseModel):
 
         elif self.model_naam == 'FPN':
             self.name = f"{self.model_naam}__E-{self.config['encoder_name']}__W-{self.config['encoder_weights']}__C-{self.config['in_channels']}"
-
             self.model = smp.FPN(
-                        encoder_name=self.config['encoder_name'],        # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
-                        encoder_weights=self.config['encoder_weights'],     # use `imagenet` pre-trained weights for encoder initialization
-                        in_channels= self.config['in_channels'],                  # model input channels (1 for gray-scale images, 3 for RGB, etc.)
-                        classes=self.config['classes'],                      # model output channels (number of classes in your dataset)
-                    )
-        elif self.model_naam == 'FPN':
-            self.name = f"{self.model_naam}__E-{self.config['encoder_name']}__W-{self.config['encoder_weights']}__C-{self.config['in_channels']}"
+                encoder_name=self.config['encoder_name'],
+                encoder_weights=self.config['encoder_weights'],
+                in_channels=self.config['in_channels'],
+                classes=self.config['classes'],
+            )
 
-            self.model = smp.FPN(**self.config)
-        elif self.model_naam == 'DeepLabv3':
+        elif self.model_naam == 'DeepLabV3':
             self.name = f"{self.model_naam}__E-{self.config['encoder_name']}__W-{self.config['encoder_weights']}__C-{self.config['in_channels']}"
-
             self.model = smp.DeepLabV3(**self.config)
-
-        # print(self.model)
 
         self.preproc_func = get_preprocessing_fn(self.config['encoder_name'], self.config['encoder_weights'])
 
-    config = ConfigDict(arbitrary_types_allowed=True)
-
-    def forward(self, x)->torch.Tensor :
-        if self.config.get('apply_preprocessing', False):
-            x = self.preproc_func(x)
-
-        # output : torch.Size([batch_sz, num_classes, h, w])
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        # x = self.preproc_func(x)  # Uncomment this line if you need preprocessing
         x = self.model(x)
-        x = torch.sigmoid(x)  # Ensure it's between 0 and 1
+        x = torch.sigmoid(x)  # Ensure output is between 0 and 1
         x = x.squeeze(1)
         return x
 

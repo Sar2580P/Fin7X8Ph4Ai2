@@ -3,6 +3,10 @@ from torch.utils.data import  DataLoader
 from processing.data_loading import SegmentationDataset
 import pandas as pd
 from processing.utils import read_yaml_file
+import torch
+
+
+
 
 class SegmentationDataModule(L.LightningDataModule):
     def __init__(self, loader_config_path: str):
@@ -26,9 +30,11 @@ class SegmentationDataModule(L.LightningDataModule):
                                                 config_path= 'configs/processing.yaml', apply_transform=False, in_train_mode=False)
 
         if stage == "predict":
-            self.predict_set = SegmentationDataset( samples=self.loader_config['test_df'], is_patched_dataset=self.loader_config['patched_dataset'],
+            self.predict_set = SegmentationDataset( samples=self.loader_config['predict_df'], is_patched_dataset=self.loader_config['patched_dataset'],
                                                     img_dir=self.loader_config['img_dir'],
-                                                    config_path= 'configs/processing.yaml', apply_transform=False, in_train_mode=False)
+                                                    config_path= 'configs/processing.yaml', apply_transform=False, in_train_mode=False,
+                                                    in_predict_mode=True)
+
 
     def train_dataloader(self):
         return DataLoader(self.train_set, batch_size=self.loader_config['BATCH_SIZE'], shuffle=True,
