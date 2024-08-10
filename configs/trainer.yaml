@@ -1,5 +1,5 @@
 dir : 'results'
-MAX_EPOCHS : 25
+MAX_EPOCHS : 100
 BATCH_SIZE : 16
 GRAD_ACCUMULATION_STEPS : 4
 lr : !!float 0.00007
@@ -23,7 +23,7 @@ callbacks:
   ModelCheckpoint:
     monitor: 'total_val_loss'
     mode: 'min'
-    save_top_k: 5
+    save_top_k: 2
     save_last: True
   EarlyStopping:
     monitor: 'total_val_loss'

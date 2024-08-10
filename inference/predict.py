@@ -3,7 +3,7 @@ from training.modelling.models import SegmentationModels
 from training.train_loop import FieldInstanceSegment
 from pytorch_lightning import Trainer
 import os
-from training.callbacks import (checkpoint_callback, rich_progress_bar, 
+from training.callbacks import (checkpoint_callback, rich_progress_bar,
                                 rich_model_summary)
 from processing.utils import read_yaml_file, logger
 import torch
@@ -33,28 +33,35 @@ if __name__ == '__main__':
     trainer = Trainer(callbacks=[checkpoint_callback, rich_progress_bar, rich_model_summary],
                     accelerator = 'gpu'
                     )
-    
-    patcher = ImagePatcher(patch_size=(256, 256), overlap=(50, 50) ,output_dir='data/inference')
-    
+
+    patcher = ImagePatcher(patch_size=(256, 256), overlap=(50,50) ,output_dir='data/inference')
+
     if not os.path.exists('data/inference/patches'):
-        os.makedirs('data/inference/patches')    
+        os.makedirs('data/inference/patches')
 
         source_dir = 'data/3channel_images'
         logger.info('Creating patches from images...')
         patcher.save_patches(source_dir)
-    
-    
+
+
     logger.info('Predicting masks on patches...')
     data_module.setup(stage="predict")
     segmentation_setup.results_dir += 'tests/'
     trainer.predict(dataloaders=data_module.predict_dataloader(), model=segmentation_setup , ckpt_path='last')
     logger.info(f'Patch Results saved to : {segmentation_setup.results_dir}{model.name}')
-    
+
     logger.info('Reconstructing image from patches...')
     patcher.mask_patch_dir = f"{segmentation_setup.results_dir}{model.name}/"
     patcher.reconstruct_save_dir = f"{training_config['dir']}/output_masks/reconstructed/{model.name}"
-    patcher.reconstruct_image('data/inference', 'data/inference/patches_metadata.json')
-    
+    patcher.reconstruct_image('data/inference/patches_metadata.json')
+
     logger.info(f'Image Reconstructed and saved to : {patcher.reconstruct_save_dir}')
     logger.info('------ Done! ------')
-    
+
+
+    #plot one of the reconstructed images
+    import matplotlib.pyplot as plt
+    import numpy as np
+    img = np.load('results/output_masks/reconstructed/DeepLabV3__E-resnet50__W-imagenet__C-3/test_1.npy')
+    img = (img * 255).astype(np.uint8) if img.max() <= 1 else img
+    plt.imsave('pics/test_1.png', img , cmap='gray')

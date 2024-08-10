@@ -31,7 +31,7 @@ class FieldInstanceSegment(pl.LightningModule):
 
     self.losses = [
             ("jaccard", 0.1, JaccardLoss(mode="binary", from_logits=True )),
-            ("focal", 0.9, BinaryFocalLoss(alpha=0.4, gamma=2.3)),
+            ("focal", 0.9, BinaryFocalLoss(alpha=0.7, gamma=2)),
         ]
 
     self.miou = MeanIoU(num_classes=2, per_class=False, include_background=False)
@@ -126,7 +126,7 @@ class FieldInstanceSegment(pl.LightningModule):
     save_dir = self.results_dir + self.model.name
     if not os.path.exists(save_dir):
       os.makedirs(save_dir)
-      
+
     for i, mask_name in enumerate(batch_mask_name):
       np.save(f'{save_dir}/{mask_name.strip()}.npy', pred_mask[i])
     return
