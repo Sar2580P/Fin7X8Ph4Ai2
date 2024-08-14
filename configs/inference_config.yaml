@@ -1,0 +1,8 @@
+patch_size: 
+  - 256
+  - 256
+ckpt: ''
+model_config : configs/unet_family.yaml
+source_dir: abc
+dest_dir: dest
+visualize : False
