@@ -5,7 +5,7 @@ DeepLabV3_config:
   encoder_depth: 5
   encoder_name: resnet50
   encoder_weights: imagenet
-  in_channels: 3
+  in_channels: 12
   upsampling: 8
 FPN_config:
   activation: sigmoid

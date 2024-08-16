@@ -108,9 +108,9 @@ class SegmentationDataset(Dataset):
         if(check_nan_inf(image)):
             logger.critical(f"Image {image_name} contains NaN or Inf values")
 
-        # image = np.nan_to_num(image, nan=0.0, posinf=1.0, neginf=0.0)
-        # image = np.clip(image, 0, 1)
-        # mask = np.clip(mask, 0, 1
+            image = np.nan_to_num(image, nan=0.0, posinf=1.0, neginf=0.0)
+            image = np.clip(image, 0, 1)
+            mask = np.clip(mask, 0, 1)
         image = (image*255 ).astype(np.uint8)
         mask = (mask * 255).astype(np.uint8)
 

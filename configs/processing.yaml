@@ -8,7 +8,7 @@ mask_threshold : 0.2
 patch_config :
   patch_size : 256
   patch_offset : 50
-  source_image_dir : 'data/3channel_images'
+  source_image_dir : 'data/full_channel_images'
   source_mask_dir : 'data/masks'
   save_patch_img_dir : 'data/patched_images'
   save_patch_mask_dir : 'data/patched_masks'
