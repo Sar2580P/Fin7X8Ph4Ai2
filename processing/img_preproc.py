@@ -10,6 +10,7 @@ from tqdm import tqdm
 import json
 from processing.utils import read_yaml_file
 from processing.patching import Patch
+from processing.index_calculation import IndexCalculationConfig, IndexCalculator
 
 def take_3_channels(channel_indices: List[int], img_path: str, save_path: str) -> np.ndarray:
     # Ensure exactly 3 channels are selected
@@ -189,6 +190,13 @@ if __name__ == '__main__':
     if not os.path.exists('data/updated_train_annotation.json'):
         update_annotations()
         print('Updated annotations created successfully')
+    
+    index_calculation_config = processing_config['index_calculation']
+    if not os.path.exists(index_calculation_config['output_dir']):
+        config = IndexCalculationConfig.from_config(index_calculation_config)
+
+        index_calculator = IndexCalculator(config)
+        index_calculator.process_directory()
 
     if not os.path.exists('data/patched_images'):
         patch_config = processing_config['patch_config']

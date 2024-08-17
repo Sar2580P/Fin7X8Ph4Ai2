@@ -3,12 +3,19 @@ img_height : 224   # reshaping , ignore if using fixed size patches
 img_width : 224
 mask_threshold : 0.2
 
+# channel indexing config
+index_calculation :
+  input_dir: data/original_images
+  output_dir: data/channel_indexing_full   # may not exist initially
+  stack_indices:  True  # Whether to stack new channels or create a new image with existing channels
+  description: "Generated using IndexCalculation tool"
+
 
 # patch related config
 patch_config :
   patch_size : 256
   patch_offset : 50
-  source_image_dir : 'data/full_channel_images'
+  source_image_dir : 'data/channel_indexing_full'
   source_mask_dir : 'data/masks'
   save_patch_img_dir : 'data/patched_images'
   save_patch_mask_dir : 'data/patched_masks'
