@@ -59,6 +59,7 @@ class FieldInstanceSegment(pl.LightningModule):
 
   def validation_step(self, batch, batch_idx):
     x, ground_mask = batch['image'], batch['mask']
+
     logits = self.model.forward(x)
 
     # indexed_preds = (logits > self.config['threshold']).int()
@@ -79,20 +80,20 @@ class FieldInstanceSegment(pl.LightningModule):
 
 
 
-    if batch_idx == 0:
-        num_images_to_log = min(5, x.size(0))  # Ensure we log no more than available images
-        for i in range(num_images_to_log):
-            # Convert tensors to numpy arrays and scale
-            image = (x[i].cpu().permute(1, 2, 0).numpy() * 255).astype(np.uint8)  # Convert to HWC format
-            ground_mask_image = (ground_mask[i].cpu().numpy() * 255).astype(np.uint8)
-            pred_mask_image = (logits[i].cpu().numpy() * 255).astype(np.uint8)
+    # if batch_idx == 0:
+    #     num_images_to_log = min(5, x.size(0))  # Ensure we log no more than available images
+    #     for i in range(num_images_to_log):
+    #         # Convert tensors to numpy arrays and scale
+    #         image = (x[i].cpu().permute(1, 2, 0).numpy() * 255).astype(np.uint8)  # Convert to HWC format
+    #         ground_mask_image = (ground_mask[i].cpu().numpy() * 255).astype(np.uint8)
+    #         pred_mask_image = (logits[i].cpu().numpy() * 255).astype(np.uint8)
 
-            # Log images with correct shapes
-            self.logger.experiment.log({
-                f'val_image_{i}': wandb.Image(image),
-                f'val_ground_mask_{i}': wandb.Image(ground_mask_image),
-                f'val_pred_mask_{i}': wandb.Image(pred_mask_image)
-            })
+    #         # Log images with correct shapes
+    #         self.logger.experiment.log({
+    #             f'val_image_{i}': wandb.Image(image),
+    #             f'val_ground_mask_{i}': wandb.Image(ground_mask_image),
+    #             f'val_pred_mask_{i}': wandb.Image(pred_mask_image)
+    #         })
 
     return {"loss": total_loss}
 

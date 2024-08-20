@@ -15,6 +15,7 @@ from PIL import Image
 import matplotlib.colors as mcolors
 import random
 import warnings
+import tifffile as tiff
 
 warnings.filterwarnings('ignore', category=rasterio.errors.NotGeoreferencedWarning)
 
@@ -70,7 +71,7 @@ class SegmentationDataset(Dataset):
         TransformBoth(transforms.RandomHorizontalFlip(p=0.5)),
         TransformBoth(transforms.RandomVerticalFlip(p=0.4)),
         TransformBoth(transforms.RandomAffine(degrees=2, translate=(0.01, 0.01), scale=(0.9, 1.1))),
-        TransformBoth(AutoAugment(policy=AutoAugmentPolicy.CIFAR10)),
+        # TransformBoth(AutoAugment(policy=AutoAugmentPolicy.CIFAR10)),    # can'tbe usedwith images having > 3 channels
         ])
 
     @property
@@ -91,62 +92,53 @@ class SegmentationDataset(Dataset):
 
     def __getitem__(self, idx: int) -> Dict[str, Any]:
         image_name, mask_name = self.samples.loc[idx, 'img'], self.samples.loc[idx, 'mask']
-        image = rasterio.open(os.path.join(self.img_dir, image_name)).read()
-        image = np.transpose(image, (1, 2, 0))
+        image = tiff.imread(os.path.join(self.img_dir, image_name))
 
         if self.mask_dir:
             mask = np.load(os.path.join(self.mask_dir, mask_name))
-
         else:  # for test data
             mask = np.zeros(image.shape[:-1], dtype=np.uint8)
 
-        # logger.info(f"min: {np.min(image)}, max: {np.max(image)}")
-        # normalise image
-        image = (image - np.min(image)) / (np.max(image) - np.min(image))
+        # Normalize image
+        image_min, image_max = np.min(image), np.max(image)
+        image = (image - image_min) / (image_max - image_min)
 
-        # Convert image and mask to uint8 before converting to PIL)
-        if(check_nan_inf(image)):
-            logger.critical(f"Image {image_name} contains NaN or Inf values")
+        # if np.isnan(image).any() or np.isinf(image).any():
+        #     image = np.nan_to_num(image, nan=0.0, posinf=1.0, neginf=0.0)
+        #     image = np.clip(image, 0, 1)
+        #     mask = np.clip(mask, 0, 1)
 
-            image = np.nan_to_num(image, nan=0.0, posinf=1.0, neginf=0.0)
-            image = np.clip(image, 0, 1)
-            mask = np.clip(mask, 0, 1)
-        image = (image*255 ).astype(np.uint8)
+        image = (image * 255).astype(np.uint8)
         mask = (mask * 255).astype(np.uint8)
 
-        # Convert image and mask to PIL images before applying pre-transforms
-        image = Image.fromarray(image)
-        mask = Image.fromarray(mask)
-
-        # mask  = np.transpose(mask, (2,0,1))
+        # Apply pre-transforms to the image and mask
         if not self.is_patched_dataset:
-            # Apply pre-transforms to the image and mask
             image = self.pre_transforms(image)
             mask = self.pre_transforms(mask)
+
+
+
+        # Apply post-transforms to the image
+        image = self.post_transforms(image)
+        mask = self.post_transforms(mask)
 
         # Apply selection-based augmentation if specified
         if self.apply_transform and self.in_train_mode:
             image, mask = self.train_transforms(image, mask)
 
-        # Apply post-transforms to the image
-        image = self.post_transforms(image)
-
-        '''
-        normalising mask to range 0-1, by dividing by 255
-        so that loss function does not give huge loss thus leading to high gradients
-        '''
-        mask = (np.array(mask)/255.0)> self.config['mask_threshold']
-        mask = torch.from_numpy(mask).to(torch.int8)
-
-        data=  {
+        # Normalize mask to range 0-1
+        mask = (mask / 255.0) > self.config['mask_threshold']
+        # mask = mask.astype(np.int8)
+        data = {
             "image": image.float(),
-            "mask": mask
+            "mask": mask.squeeze().to(torch.int8)
         }
         if self.in_predict_mode:
             data.update({
                 "image_name": image_name,
                 "mask_name": mask_name.split('.')[0]
             })
+
         return data
 
 

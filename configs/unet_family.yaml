@@ -5,7 +5,7 @@ DeepLabV3_config:
   encoder_depth: 5
   encoder_name: resnet50
   encoder_weights: imagenet
-  in_channels: 12
+  in_channels: 16
   upsampling: 8
 FPN_config:
   activation: sigmoid
@@ -17,7 +17,7 @@ FPN_config:
   encoder_depth: 5
   encoder_name: resnet50
   encoder_weights: imagenet
-  in_channels: 3
+  in_channels: 16
   upsampling: 4
 UnetPlusPlus_config:
   activation: sigmoid
@@ -27,15 +27,12 @@ UnetPlusPlus_config:
   encoder_depth: 5
   encoder_name: resnet50
   encoder_weights: imagenet
-  in_channels: 3
+  in_channels: 16
 Unet_config:
   activation: sigmoid
   classes: 1
   decoder_attention_type: scse
   encoder_name: resnet50
   encoder_weights: imagenet
-  in_channels: 3
-
-
-  
+  in_channels: 16
 model_name: DeepLabV3
