@@ -125,6 +125,8 @@ class ImagePatcher:
             file_path = os.path.join(self.inf_config['source_dir'], file_name)
 
             image = self.load_image(file_path)
+            image = (image - np.min(image)) / (np.max(image) - np.min(image))
+            image = (image*255 ).astype(np.uint8)
             patches = self.extract_patches(image)
             predicted_patches = self.predict(patches)
             stitched_image = self.stitch_patches(predicted_patches, image.shape)
