@@ -3,19 +3,18 @@ MAX_EPOCHS : 100
 BATCH_SIZE : 16
 GRAD_ACCUMULATION_STEPS : 4
 lr : !!float 0.00007
-threshold : !!float 0.1
 weight_decay : !!float 1e-8
 log_every_n_steps : 32   # should be less than the number of steps in an epoch, i.e. BATCH_SIZE
 NUM_WORKERS : 95
 patched_dataset : !!bool True    # whether the dataset comprises of fixed size patches or not
-img_dir : 'data/patched_images'
+img_dir : 'data/patched_images_test'
 mask_dir : 'data/patched_masks'
 train_df : 'data/train_patch_df.csv'
 val_df : 'data/val_patch_df.csv'
 test_df : 'data/test_patch_df.csv'
-predict_df : 'data/test_patch_df.csv'
+predict_df : 'data/predict_patch_df.csv'
 ckpt_file_name : 'Epoch-{epoch}__Loss-{val_loss:.2f}'
-plot_masks : 5
+plot_masks : 7
 
 
 # CALLBACK related config

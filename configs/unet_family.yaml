@@ -35,4 +35,4 @@ Unet_config:
   encoder_name: resnet50
   encoder_weights: imagenet
   in_channels: 16
-model_name: DeepLabV3
+model_name : UnetPlusPlus

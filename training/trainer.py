@@ -17,7 +17,7 @@ data_module = SegmentationDataModule(loader_config_path='configs/trainer.yaml')
 
 model = SegmentationModels(config_path='configs/unet_family.yaml')
 model.get_model()
-
+# model.name += '_Ensemble'
 
 
 segmentation_setup = FieldInstanceSegment(config_path='configs/trainer.yaml', model=model)
@@ -38,16 +38,17 @@ trainer = Trainer(callbacks=[early_stop_callback, checkpoint_callback, rich_prog
                   accelerator = 'gpu' ,max_epochs=training_config['MAX_EPOCHS'], logger=[wandb_logger, csv_logger] ,
                   accumulate_grad_batches=training_config['GRAD_ACCUMULATION_STEPS'])
 
-data_module.setup(stage="fit")
-trainer.fit(model = segmentation_setup , train_dataloaders=data_module.train_dataloader(),
-            val_dataloaders=data_module.val_dataloader() , ckpt_path='last')
+# data_module.setup(stage="fit")
+# trainer.fit(model = segmentation_setup , train_dataloaders=data_module.train_dataloader(),
+#             val_dataloaders=data_module.val_dataloader() , ckpt_path='last')
 
-data_module.setup(stage="test")
-trainer.test(dataloaders=data_module.test_dataloader() , ckpt_path='last')
-
+# data_module.setup(stage="test")
+# trainer.test(dataloaders=data_module.test_dataloader() , ckpt_path='last')
 
 data_module.setup(stage="predict")
 trainer.predict(dataloaders=data_module.predict_dataloader(), model=segmentation_setup , ckpt_path='last')
+
+
 
 # ckpt_files = os.listdir(checkpoint_callback.dirpath)
 # data_module.setup(stage="predict")

@@ -17,6 +17,7 @@ class Patch(BaseModel):
     save_patch_img_dir: str     # not initially present, DirectoryPath validates the path
     save_patch_mask_dir: str    # not initially present, DirectoryPath validates the path
     patch_offset: PositiveInt = 50
+    save_patch_img_dir_predict: str = None
 
     # @field_validator('patch_offset')
     # def check_offset(cls, v, values, info: ValidationInfo):
@@ -88,12 +89,25 @@ class Patch(BaseModel):
             self.save_patches(image_patches, self.save_patch_img_dir, image_file.split('.')[0])
             self.save_patches(mask_patches, self.save_patch_mask_dir, mask_file.split('.')[0], is_mask=True)
 
+    def patchify_images_only(self):
+        assert self.save_patch_img_dir_predict is not None, "save_patch_img_dir_test must be provided"
+        if not os.path.exists(self.save_patch_img_dir_predict):
+            os.makedirs(self.save_patch_img_dir_predict)
+
+        image_files = [f for f in os.listdir(self.source_image_dir) if (f.endswith('.tif') and f.startswith('test'))]
+
+        for image_file in tqdm(image_files, total=len(image_files), desc="Patchifying images only"):
+            image_path = os.path.join(self.source_image_dir, image_file)
+            image = imread(image_path)
+            image_patches = self.patchify_image(image)
+            self.save_patches(image_patches, self.save_patch_img_dir_predict, image_file.split('.')[0])
+
     def create_patch_df(self, dir: str = 'data', is_train: bool = True):
         df = pd.DataFrame(columns=['img', 'mask', 'class label'])
 
         train_patched_images = [f for f in os.listdir(f'{dir}/patched_images') if f.startswith('train')]
         train_patched_masks = [f for f in os.listdir(f'{dir}/patched_masks') if f.startswith('train')]
-        predict_patched_images = [f for f in os.listdir(f'{dir}/patched_images') if f.startswith('test')]
+
 
         train_patched_images.sort()
         train_patched_masks.sort()
@@ -107,6 +121,7 @@ class Patch(BaseModel):
         train_df, val_df = train_test_split(df, test_size=0.2, stratify=df['class label'], random_state=42)
         train_df, test_df = train_test_split(train_df, test_size=0.2, stratify=train_df['class label'], random_state=42)
 
+        predict_patched_images = [f for f in os.listdir(f'{self.save_patch_img_dir_predict}') if f.startswith('test')]
         predict_df = pd.DataFrame(columns=['img', 'mask', 'class label'])
         for i in range(len(predict_patched_images)):
             img = predict_patched_images[i]

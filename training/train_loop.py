@@ -120,7 +120,7 @@ class FieldInstanceSegment(pl.LightningModule):
 
   def predict_step(self, batch, batch_idx):
 
-    x , batch_mask_name = batch['image'], batch['mask_name']
+    x , batch_image_name = batch['image'], batch['image_name']
     pred_mask = self.model.forward(x).cpu().detach().numpy()
 
     # pred_mask = (pred_mask > self.config['threshold']).int()
@@ -128,8 +128,8 @@ class FieldInstanceSegment(pl.LightningModule):
     if not os.path.exists(save_dir):
       os.makedirs(save_dir)
 
-    for i, mask_name in enumerate(batch_mask_name):
-      np.save(f'{save_dir}/{mask_name.strip()}.npy', pred_mask[i])
+    for i, name in enumerate(batch_image_name):
+      np.save(f"{save_dir}/{name.split('.')[0]}.npy", pred_mask[i])
     return
 
 

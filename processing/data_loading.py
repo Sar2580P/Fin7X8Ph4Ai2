@@ -9,13 +9,11 @@ import torch
 from torch.utils.data import Dataset
 import rasterio
 from processing.utils import read_yaml_file , logger
-from torchvision.transforms import functional as F
 import matplotlib.pyplot as plt
 from PIL import Image
-import matplotlib.colors as mcolors
 import random
 import warnings
-import tifffile as tiff
+import tifffile
 
 warnings.filterwarnings('ignore', category=rasterio.errors.NotGeoreferencedWarning)
 
@@ -71,11 +69,11 @@ class SegmentationDataset(Dataset):
         TransformBoth(transforms.RandomHorizontalFlip(p=0.5)),
         TransformBoth(transforms.RandomVerticalFlip(p=0.4)),
         TransformBoth(transforms.RandomAffine(degrees=2, translate=(0.01, 0.01), scale=(0.9, 1.1))),
-        # TransformBoth(AutoAugment(policy=AutoAugmentPolicy.CIFAR10)),    # can'tbe usedwith images having > 3 channels
+        # TransformBoth(AutoAugment(policy=AutoAugmentPolicy.CIFAR10)),
         ])
 
     @property
-    def post_transforms(self):
+    def initial_transforms(self):
         return transforms.Compose([
             transforms.ToTensor()
         ])
@@ -91,122 +89,89 @@ class SegmentationDataset(Dataset):
         return self.samples.shape[0]
 
     def __getitem__(self, idx: int) -> Dict[str, Any]:
-        image_name, mask_name = self.samples.loc[idx, 'img'], self.samples.loc[idx, 'mask']
-        image = tiff.imread(os.path.join(self.img_dir, image_name))
 
+        image_name, mask_name = self.samples.loc[idx, 'img'], self.samples.loc[idx, 'mask']
+        image = tifffile.imread(os.path.join(self.img_dir, image_name))
         if self.mask_dir:
             mask = np.load(os.path.join(self.mask_dir, mask_name))
+
         else:  # for test data
             mask = np.zeros(image.shape[:-1], dtype=np.uint8)
 
-        # Normalize image
-        image_min, image_max = np.min(image), np.max(image)
-        image = (image - image_min) / (image_max - image_min)
+        # normalise image
+        image = (image - np.min(image)) / (np.max(image) - np.min(image))
 
-        # if np.isnan(image).any() or np.isinf(image).any():
+        # # Convert image and mask to uint8 before converting to PIL)
+        # if(check_nan_inf(image)):
+        #     logger.critical(f"Image {image_name} contains NaN or Inf values")
+
         #     image = np.nan_to_num(image, nan=0.0, posinf=1.0, neginf=0.0)
         #     image = np.clip(image, 0, 1)
         #     mask = np.clip(mask, 0, 1)
 
-        image = (image * 255).astype(np.uint8)
+        image = (image*255 ).astype(np.uint8)
         mask = (mask * 255).astype(np.uint8)
+        image = self.initial_transforms(image)
+        mask = self.initial_transforms(mask).to(torch.uint8)
 
-        # Apply pre-transforms to the image and mask
         if not self.is_patched_dataset:
             image = self.pre_transforms(image)
             mask = self.pre_transforms(mask)
-
-
-
-        # Apply post-transforms to the image
-        image = self.post_transforms(image)
-        mask = self.post_transforms(mask)
 
         # Apply selection-based augmentation if specified
         if self.apply_transform and self.in_train_mode:
             image, mask = self.train_transforms(image, mask)
 
-        # Normalize mask to range 0-1
-        mask = (mask / 255.0) > self.config['mask_threshold']
-        # mask = mask.astype(np.int8)
-        data = {
+        data=  {
             "image": image.float(),
-            "mask": mask.squeeze().to(torch.int8)
+            "mask": mask.squeeze()
         }
+
         if self.in_predict_mode:
             data.update({
                 "image_name": image_name,
-                "mask_name": mask_name.split('.')[0]
+                # "mask_name": mask_name.split('.')[0]
             })
-
         return data
 
 
 if __name__ == "__main__":
     # Define the paths and parameters
-    img_dir = r"data/3channel_images"
-    mask_dir = r"data/patched_masks"
-    config_path = r"configs/processing.yaml"
-    save_dir = r"pics"
-
-    # Load the samples dataframe
-    samples = r"data/train_df.csv"
-
-    # # Create an instance of the SegmentationDataset
-    # dataset = SegmentationDataset(samples, img_dir, config_path, mask_dir)
-
-    # idx = np.random.randint(0, 50)
-
-    # augmented_sample = dataset.__getitem__(idx)
-    # original_sample = {
-    #     'image' : rasterio.open(os.path.join(img_dir, dataset.samples.iloc[idx , 0])).read()[2],
-    #     'mask' : np.load(os.path.join(mask_dir, dataset.samples.iloc[idx , 1]))
-    # }
-    # print(original_sample['image'].shape)
-    # print(augmented_sample['image'].shape)
-    # # plot original vs augmented
-    # fig, axes = plt.subplots(1, 4, figsize=(32, 6))
-
-    # axes[0].imshow(original_sample['image'])
-    # axes[0].set_title("Original Image")
-
-    # axes[1].imshow(original_sample['mask'])
-    # axes[1].set_title("Original Mask")
-
-    # axes[2].imshow(augmented_sample['image'][1, :, :])
-    # axes[2].set_title("Augmented Image")
-
-    # axes[3].imshow(augmented_sample['mask'].numpy())
-    # axes[3].set_title("Augmented Mask")
-    # # super title
-    # plt.suptitle(f"Original vs Augmented Image and Mask - {dataset.samples.iloc[idx, 0]}")
-
-    # plt.savefig(os.path.join(save_dir, 'original_vs_augmented.png'))
-#_______________________________________________________________________________________________________________________________
     img_dir = r"data/patched_images"
     mask_dir = r"data/patched_masks"
     config_path = r"configs/processing.yaml"
     save_dir = r"pics"
 
     # Load the samples dataframe
-    samples = r"data/test_patch_df.csv"
+    samples = r"data/train_patch_df.csv"
 
-    #checking image quality based on the threshold values
-    # make a plot showing the masks created with different thresholds
-    thresholds = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-    fig , axes = plt.subplots(3, 3, figsize=(18, 18))
+    # Create an instance of the SegmentationDataset
+    dataset = SegmentationDataset(samples=samples, img_dir=img_dir, config_path=config_path, mask_dir=mask_dir, is_patched_dataset=True)
 
     idx = np.random.randint(0, 50)
 
-    for num , threshold in enumerate(thresholds):
-        dataset = SegmentationDataset(samples, img_dir, config_path,is_patched_dataset=True , mask_dir=mask_dir, apply_transform=False)
-        dataset.config['mask_threshold'] = threshold
+    augmented_sample = dataset.__getitem__(idx)
+    original_sample = {
+        'image' : tifffile.imread(os.path.join(img_dir, dataset.samples.iloc[idx , 0]))[:,:,7],
+        'mask' : np.load(os.path.join(mask_dir, dataset.samples.iloc[idx , 1]))
+    }
+    print(original_sample['image'].shape)
+    print(augmented_sample['image'].shape)
+    # plot original vs augmented
+    fig, axes = plt.subplots(1, 4, figsize=(32, 6))
 
-        sample = dataset.__getitem__(idx)
+    axes[0].imshow(original_sample['image'])
+    axes[0].set_title("Original Image")
 
-        #plot the mask
-        axes[num//3, num%3].imshow((sample['mask']*255).numpy())
+    axes[1].imshow(original_sample['mask'])
+    axes[1].set_title("Original Mask")
 
-        axes[num//3, num%3].set_title(f"Threshold: {threshold}")
-    plt.suptitle(f"Mask quality at different thresholds - {dataset.samples.iloc[idx, 0]}")
-    plt.savefig(os.path.join(save_dir, 'mask_quality_VS_thresholds.png'))
+    axes[2].imshow(augmented_sample['image'][7, :, :])
+    axes[2].set_title("Augmented Image")
+
+    axes[3].imshow(augmented_sample['mask'].numpy())
+    axes[3].set_title("Augmented Mask")
+    # super title
+    plt.suptitle(f"Original vs Augmented Image and Mask - {dataset.samples.iloc[idx, 0]}")
+
+    plt.savefig(os.path.join(save_dir, 'original_vs_augmented.png'))

@@ -169,6 +169,46 @@ def update_annotations(data_dir:str = 'data/original_images', json_file:str = 'd
     with open(save_path, 'w') as f:
         json.dump(data, f)
 
+def stack_masks_on_images(image_dir, mask_base_dir, save_dir):
+    # Ensure save_dir exists
+    os.makedirs(save_dir, exist_ok=True)
+
+    # List all image files in the directory
+    image_files = [f for f in os.listdir(image_dir) if f.endswith('.tif')]
+
+    # List all mask directories
+    mask_dirs = [os.path.join(mask_base_dir, d) for d in os.listdir(mask_base_dir) if os.path.isdir(os.path.join(mask_base_dir, d))]
+    print(f"Found {len(mask_dirs)} mask directories")
+    for image_file in tqdm(image_files , desc = "Stacking masks on images"):
+        # Load the image
+        image_path = os.path.join(image_dir, image_file)
+        image = tiff.imread(image_path)
+
+        # Initialize a list to store the masks
+        stacked_masks = []
+
+        for mask_dir in mask_dirs:
+            # Construct the mask file path
+            mask_file = image_file.replace('.tif', '.npy')
+            mask_path = os.path.join(mask_dir, mask_file)
+
+            # Load the mask and append to the list
+            if os.path.exists(mask_path):
+                mask = np.load(mask_path)
+                mask = np.expand_dims(mask, axis=-1)
+                stacked_masks.append(mask)
+            else:
+                print(f"Mask {mask_path} not found.")
+
+        # Stack the masks along with the image
+        stacked_array = np.concatenate([image] + stacked_masks, axis=-1)
+
+        # Save the stacked image-mask array
+        save_path = os.path.join(save_dir, image_file)
+        tiff.imwrite(save_path, stacked_array)
+
+
+
 
 
 if __name__ == '__main__':
@@ -183,14 +223,14 @@ if __name__ == '__main__':
         create_masks()
         print('Masks created successfully')
 
-    if not os.path.exists('data/3channel_images'):
-        apply_3_channel_preprocessing()
-        print('3 channel images created successfully')
+    # if not os.path.exists('data/3channel_images'):
+    #     apply_3_channel_preprocessing()
+    #     print('3 channel images created successfully')
 
     if not os.path.exists('data/updated_train_annotation.json'):
         update_annotations()
         print('Updated annotations created successfully')
-    
+
     index_calculation_config = processing_config['index_calculation']
     if not os.path.exists(index_calculation_config['output_dir']):
         config = IndexCalculationConfig.from_config(index_calculation_config)
@@ -203,8 +243,17 @@ if __name__ == '__main__':
 
         patch_maker = Patch.from_config(patch_config)
         patch_maker.patchify_images_and_masks()
+        # patch_maker.patchify_images_only()
         patch_maker.create_patch_df(is_train=True)
         patch_maker.generate_segmentation_json('data/train_patch_df.csv', 'data/train_patch_annotation.json')
         patch_maker.generate_segmentation_json('data/val_patch_df.csv', 'data/val_patch_annotation.json')
         patch_maker.generate_segmentation_json('data/test_patch_df.csv', 'data/test_patch_annotation.json')
         print('Patchifying completed successfully')
+
+
+    image_dir = "data/patched_images_test"
+    mask_base_dir = "results/output_masks"  # This dir contains multiple mask dirs
+    save_dir = "data/patched_images_stacked_masks_test"
+    if not os.path.exists(save_dir):
+        stack_masks_on_images(image_dir, mask_base_dir, save_dir)
+        print('Stacked images created successfully')

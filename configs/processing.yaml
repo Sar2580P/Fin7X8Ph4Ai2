@@ -17,5 +17,6 @@ patch_config :
   patch_offset : 50
   source_image_dir : 'data/channel_indexing_full'
   source_mask_dir : 'data/masks'
-  save_patch_img_dir : 'data/patched_images'
+  save_patch_img_dir : 'data/patched_images_predict'
   save_patch_mask_dir : 'data/patched_masks'
+  save_patch_img_dir_predict : 'data/patched_images_test'     # predict meansimages don't have corresponding true masks
