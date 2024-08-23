@@ -1,12 +1,12 @@
-patch_size: 
+patch_size:
   - 256
   - 256
-ckpt: ''
+ckpt: 'results/ckpts/UnetPlusPlus__E-resnet50__W-imagenet__C-16/last.ckpt'
 model_config : configs/unet_family.yaml
 source_dir: data/channel_indexing_full
 stitched_dest_dir: results/inference/stitched
 patched_dest_dir: results/inference/patched
-visualize : False
+visualize : True
 
 # # ensemble
 # is_ensemble : False
