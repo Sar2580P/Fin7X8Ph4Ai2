@@ -251,9 +251,9 @@ if __name__ == '__main__':
         print('Patchifying completed successfully')
 
 
-    image_dir = "data/patched_images_test"
+    image_dir = "data/patched_images"
     mask_base_dir = "results/output_masks"  # This dir contains multiple mask dirs
-    save_dir = "data/patched_images_stacked_masks_test"
+    save_dir = "data/patched_images_stacked_masks"
     if not os.path.exists(save_dir):
         stack_masks_on_images(image_dir, mask_base_dir, save_dir)
         print('Stacked images created successfully')

@@ -3,6 +3,12 @@ patch_size:
   - 256
 ckpt: ''
 model_config : configs/unet_family.yaml
-source_dir: abc
-dest_dir: dest
+source_dir: data/channel_indexing_full
+stitched_dest_dir: results/inference/stitched
+patched_dest_dir: results/inference/patched
 visualize : False
+
+# # ensemble
+# is_ensemble : False
+# mask_base_dir : results/inference
+# stacked_mask_save_dir : data/ensemble

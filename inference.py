@@ -9,20 +9,22 @@ from tqdm import tqdm
 from training.modelling.models import SegmentationModels
 from training.train_loop import FieldInstanceSegment
 from processing.utils import read_yaml_file, logger
+from processing.img_preproc import stack_masks_on_images
 
 class ImagePatcher:
     def __init__(self, inference_config_path : str):
         self.inf_config = read_yaml_file(inference_config_path)
         self.load_model()
-    
+        self.stitched_dest_dir = self.inf_config['stitched_dest_dir']+ self.model_setup.name 
+        self.patched_dest_dir = self.inf_config['patched_dest_dir']+ self.model_setup.name 
     
     def load_model(self):
-        model = SegmentationModels(config_path=self.inf_config['model_config'])
-        model.get_model()
-        segmentation_setup = FieldInstanceSegment.load_from_checkpoint(checkpoint_path=self.inf_config['ckpt'] ,config_path='configs/trainer.yaml', model=model)
-
+        self.model_setup = SegmentationModels(config_path=self.inf_config['model_config'])
+        self.model_setup.get_model()
+        segmentation_setup = FieldInstanceSegment.load_from_checkpoint(checkpoint_path=self.inf_config['ckpt'] ,
+                                                                       config_path='configs/trainer.yaml', model=self.model_setup)
         self.model = segmentation_setup.model.model
-        logger.info(f"Loaded model : {model.name} from ckpt : {self.inf_config['ckpt']}")
+        logger.info(f"Loaded model : {self.model_setup.name} from ckpt : {self.inf_config['ckpt']}")
         return
 
 
@@ -63,7 +65,7 @@ class ImagePatcher:
         
         return torch.tensor(np.array(patches)).permute(0, 3, 1, 2)
 
-    def plot_patches(self, patches: torch.Tensor, save_path: str):
+    def plot_patches(self, patches: torch.Tensor, title :str , save_path: str):
         n_patches = patches.shape[0]
         n_cols = int(np.ceil(np.sqrt(n_patches)))
         n_rows = int(np.ceil(n_patches / n_cols))
@@ -75,6 +77,8 @@ class ImagePatcher:
                 ax.axis('off')
             else:
                 ax.axis('off')
+
+        fig.suptitle(f"Inference Patches --- ({title})")
         
         plt.tight_layout()
         plt.savefig(save_path, bbox_inches='tight', pad_inches=0.1)
@@ -107,11 +111,14 @@ class ImagePatcher:
         if not os.path.isdir(self.inf_config['source_dir']):
             raise NotADirectoryError(f"Source directory not found: {self.inf_config['source_dir']}")
         
-        if not os.path.isdir(self.inf_config['dest_dir']):
-            os.makedirs(self.inf_config['dest_dir'])
+        if not os.path.isdir(self.stitched_dest_dir):
+            os.makedirs(self.stitched_dest_dir)
+        if not os.path.isdir(self.patched_dest_dir):
+            os.makedirs(self.patched_dest_dir)
+        source_files = [file_path for file_path in os.listdir(self.inf_config['source_dir']) if file_path.startswith('test')]
         
-        for file_name in tqdm(os.listdir(self.inf_config['source_dir']), 
-                              desc = f'Inferencing on {self.inf_config['source_dir']}'):
+        has_visualized :bool = False
+        for file_name in tqdm(source_files, desc = f'Inferencing on {self.inf_config['source_dir']}'):
             
             file_path = os.path.join(self.inf_config['source_dir'], file_name)
             
@@ -119,22 +126,28 @@ class ImagePatcher:
             patches = self.extract_patches(image)
             predicted_patches = self.predict(patches)
             stitched_image = self.stitch_patches(predicted_patches, image.shape)
-            stitched_image_path = os.path.join(self.inf_config['dest_dir'], f"{os.path.splitext(file_name)[0]}_stitched")
             
-            if self.inf_config['visualize']:
+            if not self.inf_config['visualize']:
+                stitched_image_path = os.path.join(self.stitched_dest_dir, f"{os.path.splitext(file_name)[0]}.npy")
+                np.save(file=stitched_image_path , arr=stitched_image)
+                
+                patched_image_path = os.path.join(self.patched_dest_dir, f"{os.path.splitext(file_name)[0]}.npy")
+                np.save(file=patched_image_path , arr=predicted_patches.to('cpu').numpy())
+                
+            elif not has_visualized: 
                 # Plot patches and save
-                plot_path = os.path.join(self.inf_config['dest_dir'], f"{os.path.splitext(file_name)[0]}_patches.png")
-                self.plot_patches(patches, plot_path)
+                plot_path = os.path.join('pics' , "patches_inference.png")
+                self.plot_patches(patches, title = file_name , save_path=plot_path)
                         
                 
                 if stitched_image.ndim == 2:  # Grayscale
                     stitched_image = np.stack([stitched_image] * 3, axis=-1)  # Convert to RGB format for saving
                 stitched_image_path += '.png'
-                Image.fromarray(stitched_image*255).save(stitched_image_path)
-            else : 
-                # save as npy file
-                stitched_image_path += '.npy'
-                np.save(file=stitched_image_path , arr=stitched_image)
+                save_path = os.path.join('pics' , 'stitched_inference.png')
+                Image.fromarray(stitched_image*255).save(save_path)
+                
+                has_visualized = True
+    
 
 
 
