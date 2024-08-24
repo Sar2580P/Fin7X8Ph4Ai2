@@ -9,7 +9,7 @@ from tqdm import tqdm
 from training.modelling.models import SegmentationModels
 from training.train_loop import FieldInstanceSegment
 from processing.utils import read_yaml_file, logger
-from processing.img_preproc import stack_masks_on_images
+from typing import List
 
 class ImagePatcher:
     def __init__(self, inference_config_path : str):
@@ -73,7 +73,7 @@ class ImagePatcher:
         fig, axes = plt.subplots(n_rows, n_cols, figsize=(n_cols*2, n_rows*2))
         for i, ax in enumerate(axes.flat):
             if i < n_patches:
-                ax.imshow(patches[i].permute(1, 2, 0).numpy())
+                ax.imshow(patches[i].permute(1, 2, 0).numpy() , cmap='gray')
                 ax.axis('off')
             else:
                 ax.axis('off')
@@ -97,7 +97,7 @@ class ImagePatcher:
         pad_w = (pw - (original_shape[1] % pw)) % pw
         padded_shape = (original_shape[0] + pad_h, original_shape[1] + pad_w)
 
-        recon_image = np.zeros((padded_shape[0], padded_shape[1], c), dtype=np.uint8)
+        recon_image = np.zeros((padded_shape[0], padded_shape[1], c), dtype=np.float32)
         patch_idx = 0
 
         for i in range(0, padded_shape[0] - ph + 1, ph):
@@ -131,14 +131,13 @@ class ImagePatcher:
             predicted_patches = self.predict(patches)
             stitched_image = self.stitch_patches(predicted_patches, image.shape)
 
-            if not self.inf_config['visualize']:
-                stitched_image_path = os.path.join(self.stitched_dest_dir, f"{os.path.splitext(file_name)[0]}.npy")
-                np.save(file=stitched_image_path , arr=stitched_image)
+            stitched_image_path = os.path.join(self.stitched_dest_dir, f"{os.path.splitext(file_name)[0]}.npy")
+            np.save(file=stitched_image_path , arr=stitched_image)
 
-                patched_image_path = os.path.join(self.patched_dest_dir, f"{os.path.splitext(file_name)[0]}.npy")
-                np.save(file=patched_image_path , arr=predicted_patches.to('cpu').numpy())
+            patched_image_path = os.path.join(self.patched_dest_dir, f"{os.path.splitext(file_name)[0]}.npy")
+            np.save(file=patched_image_path , arr=predicted_patches.numpy())
 
-            elif not has_visualized:
+            if (not has_visualized) and self.inf_config['visualize']:
 
                 # plot 4thchannel of image
                 channel_4 = image[:, :, 3]
@@ -151,14 +150,75 @@ class ImagePatcher:
                 if stitched_image.ndim == 2:  # Grayscale
                     stitched_image = np.stack([stitched_image] * 3, axis=-1)  # Convert to RGB format for saving
                 save_path = os.path.join('pics' , f"stitched_inference_{self.model_setup.name}.png")
-                Image.fromarray(stitched_image*255).save(save_path)
+                # stitched_image = (stitched_image-np.min(stitched_image))/(np.max(stitched_image)-np.min(stitched_image))
+                plt.imsave(arr=stitched_image , fname=save_path)
 
                 has_visualized = True
+            return
+
+    def stack_masks_over_image(self, image:torch.Tensor, mask_list:List[np.ndarray]) -> torch.Tensor:
+        mask_tensors = [torch.from_numpy(mask) for mask in mask_list]
+        masks_concatenated = torch.cat(mask_tensors, dim=1)
+        stacked_image = torch.cat((image, masks_concatenated), dim=1)
+        return stacked_image
+
+    def ensemble_prediction(self):
+        self.stitched_dest_dir += '_ensemble'
+        self.patched_dest_dir = self.patched_dest_dir[: self.patched_dest_dir.rfind('/')]
+        if not os.path.exists(self.stitched_dest_dir):
+            os.makedirs(self.stitched_dest_dir)
+
+        image_files = [f for f in os.listdir(self.inf_config['source_dir']) if f.startswith('test')]
+
+        # Assuming patch_dir contains separate folders for each model's mask patches
+        model_dirs = [os.path.join(self.patched_dest_dir, d) for d in os.listdir(self.patched_dest_dir)
+                      if os.path.isdir(os.path.join(self.patched_dest_dir, d))]
+
+        has_visualized = False
+        for image_file in tqdm(image_files , desc = f"Performing enseble inference on stacked image"):
+
+            image_path = os.path.join(self.inf_config['source_dir'], image_file)
+            image:np.ndarray = self.load_image(image_path)
+            image = (image - np.min(image)) / (np.max(image) - np.min(image))
+            image = (image*255 ).astype(np.uint8)
+            img_patches = self.extract_patches(image)
+
+            masks = []
+            for model_dir in model_dirs:
+                mask_path = os.path.join(model_dir, image_file.replace('.tif', '.npy'))
+                masks.append(self.load_image(mask_path))
+
+            stacked_patches = self.stack_masks_over_image(img_patches, masks)
+            predicted_patches = self.predict(stacked_patches)
+            stitched_image = self.stitch_patches(predicted_patches, image.shape)
+
+            stitched_image_path = os.path.join(self.stitched_dest_dir, f"{os.path.splitext(image_file)[0]}.npy")
+            np.save(file=stitched_image_path , arr=stitched_image)
+
+            # patched_image_path = os.path.join(self.patched_dest_dir, f"{os.path.splitext(file_name)[0]}.npy")
+            # np.save(file=patched_image_path , arr=predicted_patches.numpy())
+
+            if (not has_visualized) and self.inf_config['visualize']:
+
+                # plot 4thchannel of image
+                channel_4 = image[:, :, 3]
+                plt.imsave(arr=channel_4 , cmap='gray' , fname=os.path.join('pics' , f"channel4_inference.png"))
+                # Plot patches and save
+                plot_path = os.path.join('pics' , f"ensemble_patches_inference_{self.model_setup.name}.png")
+                self.plot_patches(predicted_patches, title = image_file , save_path=plot_path)
 
 
+                if stitched_image.ndim == 2:  # Grayscale
+                    stitched_image = np.stack([stitched_image] * 3, axis=-1)  # Convert to RGB format for saving
+                save_path = os.path.join('pics' , f"ensemble_stitched_inference_{self.model_setup.name}.png")
+                # stitched_image = (stitched_image-np.min(stitched_image))/(np.max(stitched_image)-np.min(stitched_image))
+                plt.imsave(arr=stitched_image , fname=save_path)
 
+                has_visualized = True
+        return
 
 if __name__=='__main__':
 
     patcher = ImagePatcher(inference_config_path = 'configs/inference_config.yaml')
-    patcher.process_directory()
+    # patcher.process_directory()
+    patcher.ensemble_prediction()

@@ -27,7 +27,7 @@ UnetPlusPlus_config:
   encoder_depth: 5
   encoder_name: resnet50
   encoder_weights: imagenet
-  in_channels: 16
+  in_channels: 20
 Unet_config:
   activation: sigmoid
   classes: 1
