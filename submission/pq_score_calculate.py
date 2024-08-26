@@ -27,11 +27,11 @@ def compute_pq(gt_polygons: list, pred_polygons: list, iou_threshold=0.5):
         for pred_idx, pred_polygon in enumerate(pred_polygons):
             # if gt_matched[gt_idx] == 1 or pred_matched[pred_idx] == 1:
             #     continue
-            
+
             iou = getIOU(gt_polygon, pred_polygon)
             if iou == 0:
                 continue
-            
+
             if iou > best_iou:
                 best_iou = iou
                 best_pred_idx = pred_idx
@@ -40,7 +40,7 @@ def compute_pq(gt_polygons: list, pred_polygons: list, iou_threshold=0.5):
             gt_matched[gt_idx] = 1
             pred_matched[best_pred_idx] = 1
 
-    
+
     sq_sum = sum(matched_instances.values())
     num_matches = len(matched_instances)
     sq = sq_sum / num_matches if num_matches else 0
@@ -58,27 +58,30 @@ def get_polygons_from_annot(annot:List):
         polygons.append(polygon)
     return polygons
 
-
+import pandas as pd
 def get_score_for_all_images(gt_annots :List, pred_annots:List)->dict:
     pq_scores = {}
-
+    df = pd.DataFrame(columns=['file_name', 'pq', 'sq', 'rq'])
+    print(len(gt_annots), len(pred_annots))
     for gt_annot , pred_annot in zip(gt_annots, pred_annots):
         gt_polygons = get_polygons_from_annot(gt_annot['annotations'])
         pred_polygons = get_polygons_from_annot(pred_annot['annotations'])
-        assert gt_annot['file_name'] == pred_annot['file_name'] , 'file names are not same'
+        assert gt_annot['file_name'] == pred_annot['file_name'] , f"file names are not same , {gt_annot['file_name']} != {pred_annot['file_name']}"
         try:
             pq, sq, rq = compute_pq(gt_polygons, pred_polygons)
             pq_scores[gt_annot['file_name']] = {'pq': pq, 'sq': sq, 'rq': rq}
-            logger.info(f"{gt_annot['file_name']} : pq: {pq}, sq: {sq}, rq: {rq}")
+            df.loc[len(df)] = [gt_annot['file_name'], pq, sq, rq]
+            # logger.info(f"{gt_annot['file_name']} : pq: {pq}, sq: {sq}, rq: {rq}")
         except Exception as e:
             logger.error(f'Error in calculating pq score for {gt_annot["file_name"]}')
-            logger.debug(e)
-            
+            logger.error(e)
+            df.loc[len(df)] = [gt_annot['file_name'], -1, -1, -1]
+    df.to_csv('submission/psr_results.csv', index=False)
     return pq_scores
-        
-    
-    
-    
+
+
+
+
 def test_compute_pq():
     polygon1 = Polygon([(1, 2), (2, 4), (3, 1)])
     polygon2 = Polygon([(0, 0), (1, 3), (2, 2), (3, 0)])
@@ -87,21 +90,21 @@ def test_compute_pq():
     polygon5 = Polygon([(4, 4), (5, 6), (7, 7), (8, 5), (7, 4)])
     polygon6 = Polygon([(1, 1), (2, 3), (3, 3), (2, 1)])
     polygon7 = Polygon([(3, 3), (4, 5), (6, 5), (7, 3), (5, 2)])
-    
+
     true_polygons = [polygon1, polygon3, polygon5, polygon7]
     pred_polygons = [polygon1, polygon2, polygon3, polygon7]
-    
+
     pq, sq, rq = compute_pq(true_polygons, pred_polygons)
     assert round(pq,1) == 0.8
     assert sq == 1
     assert round(rq,1) == 0.8
-    
+
 def test_get_iou():
     polygon1 = Polygon([(0, 0), (0, 1), (1, 1), (1, 0)])
     polygon2 = Polygon([(0, 0), (0, 1), (2, 1), (2, 0)])
-    
+
     assert getIOU(polygon1, polygon2) == 0.5
-    
+
 def test_same_score_with_dif_order():
     true_polygons = [
         Polygon([(5, 5), (6, 6), (7, 5), (8, 4), (5, 3), (5, 5)]),
@@ -119,8 +122,8 @@ def test_same_score_with_dif_order():
     pred_order_2 = [1, 0, 2]
     pq1, sq1, rq1 = compute_pq([true_polygons[i] for i in true_order_1], [pred_polygons[i] for i in pred_order_1])
     pq2, sq2, rq2 = compute_pq([true_polygons[i] for i in true_order_2], [pred_polygons[i] for i in pred_order_2])
-    
+
     assert pq1 == pq2
     assert sq1 == sq2
     assert rq1 == rq2
-    
+

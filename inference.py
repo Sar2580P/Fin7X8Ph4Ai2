@@ -117,11 +117,10 @@ class ImagePatcher:
             os.makedirs(self.stitched_dest_dir)
         if not os.path.isdir(self.patched_dest_dir):
             os.makedirs(self.patched_dest_dir)
-        source_files = [file_path for file_path in os.listdir(self.inf_config['source_dir']) if file_path.startswith('test')]
+        source_files = [file_path for file_path in os.listdir(self.inf_config['source_dir']) if file_path.startswith('train')]
 
         has_visualized :bool = False
         for file_name in tqdm(source_files, desc = f"Inferencing on {self.inf_config['source_dir']}"):
-
             file_path = os.path.join(self.inf_config['source_dir'], file_name)
 
             image = self.load_image(file_path)
@@ -154,7 +153,7 @@ class ImagePatcher:
                 plt.imsave(arr=stitched_image , fname=save_path)
 
                 has_visualized = True
-            return
+        return
 
     def stack_masks_over_image(self, image:torch.Tensor, mask_list:List[np.ndarray]) -> torch.Tensor:
         mask_tensors = [torch.from_numpy(mask) for mask in mask_list]
@@ -168,7 +167,7 @@ class ImagePatcher:
         if not os.path.exists(self.stitched_dest_dir):
             os.makedirs(self.stitched_dest_dir)
 
-        image_files = [f for f in os.listdir(self.inf_config['source_dir']) if f.startswith('test')]
+        image_files = [f for f in os.listdir(self.inf_config['source_dir']) if f.startswith('train')]
 
         # Assuming patch_dir contains separate folders for each model's mask patches
         model_dirs = [os.path.join(self.patched_dest_dir, d) for d in os.listdir(self.patched_dest_dir)

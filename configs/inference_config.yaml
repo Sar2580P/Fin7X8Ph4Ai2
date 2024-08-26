@@ -1,11 +1,11 @@
 patch_size:
   - 256
   - 256
-ckpt: 'results/ckpts/UnetPlusPlus__E-resnet50__W-imagenet__C-20_Ensemble/Epoch-epoch=57__Loss-val_loss=0.00.ckpt'
+ckpt: 'results/ckpts/UnetPlusPlus__E-resnet50__W-imagenet__C-20_Ensemble/last.ckpt'
 model_config : configs/unet_family.yaml
 source_dir: data/channel_indexing_full
-stitched_dest_dir: results/inference/stitched
-patched_dest_dir: results/inference/patched
+stitched_dest_dir: results/inference_train/stitched
+patched_dest_dir: results/inference_train/patched
 visualize : True
 do_ensemble : True
 # # ensemble
